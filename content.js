@@ -31,7 +31,7 @@
     <style>
       :host{all:initial;color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       *{box-sizing:border-box}
-      #panel{position:fixed;right:16px;top:16px;bottom:16px;width:380px;max-width:calc(100vw - 32px);background:#10131b;color:#eef1f8;border:1px solid #2a3040;border-radius:16px;box-shadow:0 18px 65px #0008;pointer-events:auto;display:flex;flex-direction:column;overflow:hidden;font-size:13px;line-height:1.45}
+      #panel{position:fixed;left:50%;right:auto;top:auto;bottom:16px;transform:translateX(-50%);width:min(900px,calc(100vw - 32px));height:min(610px,72vh);max-height:calc(100vh - 32px);background:#10131b;color:#eef1f8;border:1px solid #2a3040;border-radius:16px;box-shadow:0 18px 65px #0008;pointer-events:auto;display:flex;flex-direction:column;overflow:hidden;font-size:13px;line-height:1.45}
       #highlight{position:fixed;display:none;border:2px solid #6e9bff;background:#6e9bff22;border-radius:4px;pointer-events:none;z-index:0}
       header{height:58px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid #272d3b}
       .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;letter-spacing:.1px;flex:1}
@@ -43,12 +43,12 @@
       button.primary:hover{background:#927cff}
       button.subtle{background:transparent;border-color:transparent;padding:6px 8px;color:#aab3c5}
       button.danger{color:#ffb8b8}
-      #body{display:flex;min-height:0;flex:1}
-      nav{width:132px;flex:none;padding:9px 7px;border-right:1px solid #272d3b;overflow:auto;scrollbar-width:thin}
-      .navbtn{width:100%;text-align:left;background:transparent;border-color:transparent;color:#aeb6c7;padding:7px 8px;margin:1px 0;font-size:11px;line-height:1.2;white-space:normal}
+      #body{display:flex;min-height:0;flex:1;flex-direction:column}
+      nav{order:2;width:100%;flex:none;display:flex;align-items:center;gap:3px;padding:7px;border-right:0;border-top:1px solid #272d3b;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+      .navbtn{width:auto;flex:none;display:flex;align-items:center;gap:6px;text-align:left;background:transparent;border-color:transparent;color:#aeb6c7;padding:8px 10px;margin:0;font-size:11px;line-height:1.2;white-space:nowrap}
       .navbtn.active{background:#242b3b;border-color:#343e53;color:#fff}
-      .navbtn span{display:block;font-size:14px;margin-bottom:3px}
-      main{flex:1;min-width:0;overflow:auto;padding:17px 15px 24px;scrollbar-width:thin}
+      .navbtn span{display:block;flex:none;font-size:14px;margin-bottom:0}
+      main{order:1;flex:1;min-height:0;min-width:0;overflow:auto;padding:17px 18px 24px;scrollbar-width:thin}
       h1{font-size:18px;margin:0 0 5px;line-height:1.25} h2{font-size:13px;margin:18px 0 8px}
       p{color:#aab3c5;margin:4px 0 12px;font-size:12px}
       .muted{color:#939db1;font-size:11px}
@@ -71,6 +71,7 @@
       #footer{flex:none;border-top:1px solid #272d3b;padding:8px 13px;display:flex;align-items:center;gap:8px;color:#8490a6;font-size:10px}
       #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#202635;color:#f5f7fb;border:1px solid #414b60;padding:8px 12px;border-radius:9px;box-shadow:0 6px 24px #0008;display:none;pointer-events:none}
       .welcome{padding-top:5px}.feature{font-size:11px;color:#c3ccdc;padding:7px 0;border-bottom:1px solid #272d3b}.feature:last-child{border:0}
+      @media(max-width:640px){#panel{width:calc(100vw - 16px);height:min(560px,70vh);bottom:8px}header{height:50px;padding:0 12px}nav{padding:6px}.navbtn{padding:7px 9px;font-size:10px}main{padding:14px 13px 20px}}
     </style>
     <div id="highlight"></div>
     <section id="panel" role="dialog" aria-label="PageLens website toolkit">
