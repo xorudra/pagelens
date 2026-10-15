@@ -142,16 +142,20 @@
         }
       }
     };
-    document.getElementById("open-tools").addEventListener("click", () => {
+    const openTools = () => {
+      const existing = document.getElementById("pagelens-extension-root");
+      if (existing) {
+        existing.style.display = "block";
+        return;
+      }
+      if (document.getElementById("pagelens-preview-script")) return;
       const script = document.createElement("script");
+      script.id = "pagelens-preview-script";
       script.src = "content.js?preview=" + Date.now();
       document.body.appendChild(script);
-    });
-    window.setTimeout(() => {
-      const script = document.createElement("script");
-      script.src = "content.js?preview=" + Date.now();
-      document.body.appendChild(script);
-    }, 0);
+    };
+    document.getElementById("open-tools").addEventListener("click", openTools);
+    window.setTimeout(openTools, 0);
   </script>
 </body>
 </html>
