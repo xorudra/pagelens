@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "PageLens — Website Design Toolkit",
+  "version": "0.1.0",
+  "description": "Inspect web pages, collect design details, capture references, and experiment with local edits.",
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open PageLens"
+  }
+}
