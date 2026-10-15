@@ -23,15 +23,15 @@ PageLens processes page information in the browser. It does not send page conten
 - `downloads` saves exports, screenshots, and assets when you choose to download them.
 - PageLens does not request access to all websites, run analytics, or use a remote service.
 
-## Install for local development
+## Install in Chrome
 
-1. Open `chrome://extensions` in Chrome.
-2. Turn on **Developer mode**.
-3. Choose **Load unpacked** and select this project folder.
-4. Open a regular website and click the PageLens toolbar icon.
+1. [Download PageLens 0.1.0](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens-0.1.0.zip) and extract the ZIP.
+2. In Chrome, open `chrome://extensions`, turn on **Developer mode**, then choose **Load unpacked**.
+3. Select the extracted folder containing `manifest.json`.
+4. Open a website and click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
 
 Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. The clone tool creates a static reference and does not reproduce a site's backend or application behavior. Use collected content and assets only when you have permission.
 
 ## Chrome Web Store listing
 
-Store listing text, promotional artwork, and a release checklist are in the repository root. The extension package must be a ZIP with `manifest.json` at the ZIP root.
+Store listing text, promotional artwork, and a release checklist are in the repository root. The downloadable ZIP contains only the extension files, with `manifest.json` at its root.
