@@ -6,19 +6,19 @@
   }
 
   const tools = [
-    ["pick", "Pick element", "Select a page element and copy its HTML or CSS."],
-    ["clone", "Clone page", "Save a static snapshot of the rendered page."],
+    ["pick", "Pick element", "Select a page element and copy its HTML or CSS.", "Pick"],
+    ["clone", "Clone page", "Save a static snapshot of the rendered page.", "Clone page"],
+    ["prompt", "Design prompt", "Create a structured brief from this page.", "Prompt"],
     ["design-md", "Design MD", "Collect the page’s colors, type, and layout notes."],
-    ["prompt", "Design prompt", "Create a structured brief from this page."],
-    ["assets", "Extract assets", "Find images, SVGs, videos, and background images."],
-    ["colors", "Extract colors", "Build a reusable palette from the page."],
-    ["fonts", "Detect fonts", "Find the typefaces and text styles in use."],
-    ["swap-fonts", "Swap fonts", "Preview another font across the page."],
-    ["inspect", "Inspect & measure", "Read element dimensions, spacing, and styles."],
+    ["assets", "Extract assets", "Find images, SVGs, videos, and background images.", "Assets"],
+    ["colors", "Extract colors", "Build a reusable palette from the page.", "Colors"],
+    ["fonts", "Detect fonts", "Find the typefaces and text styles in use.", "Fonts"],
+    ["inspect", "Inspect & measure", "Read element dimensions, spacing, and styles.", "Measure"],
     ["edit-text", "Edit text", "Try copy changes directly on the page."],
-    ["screenshot", "Screenshot", "Capture the visible browser area."],
-    ["responsive", "Responsive viewer", "Preview this page at common viewport widths."],
-    ["layout", "Move & delete", "Reorder or remove elements, then undo."],
+    ["screenshot", "Screenshot", "Capture the visible browser area.", "Capture"],
+    ["responsive", "Responsive viewer", "Preview this page at common viewport widths.", "Responsive"],
+    ["swap-fonts", "Swap fonts", "Preview another font across the page.", "Swap font"],
+    ["layout", "Move & delete", "Reorder or remove elements, then undo.", "Arrange"],
   ];
 
   const host = document.createElement("div");
@@ -31,9 +31,11 @@
     <style>
       :host{all:initial;color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
       *{box-sizing:border-box}
-      #panel{position:fixed;left:50%;right:auto;top:auto;bottom:16px;transform:translateX(-50%);width:min(900px,calc(100vw - 32px));height:min(610px,72vh);max-height:calc(100vh - 32px);background:#10131b;color:#eef1f8;border:1px solid #2a3040;border-radius:16px;box-shadow:0 18px 65px #0008;pointer-events:auto;display:flex;flex-direction:column;overflow:hidden;font-size:13px;line-height:1.45}
+      #panel{position:fixed;left:50%;right:auto;top:auto;bottom:10px;transform:translateX(-50%);width:min(1120px,calc(100vw - 24px));height:auto;max-height:calc(100vh - 20px);background:#0c0c10;color:#eef1f8;border:2px solid #b064f5;border-radius:20px;box-shadow:0 14px 48px #000a;pointer-events:auto;display:flex;flex-direction:column;overflow:hidden;font-size:13px;line-height:1.45}
+      #panel.expanded{height:min(610px,72vh)}
       #highlight{position:fixed;display:none;border:2px solid #6e9bff;background:#6e9bff22;border-radius:4px;pointer-events:none;z-index:0}
-      header{height:58px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid #272d3b}
+      header{display:none;height:58px;flex:none;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid #272d3b}
+      #panel.expanded header{display:flex}
       .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;letter-spacing:.1px;flex:1}
       .logo{width:25px;height:25px;border-radius:8px;background:linear-gradient(135deg,#9a76ff,#45c6d9);display:grid;place-items:center;color:#10131b;font-size:15px;font-weight:900}
       button,select,input,textarea{font:inherit}
@@ -43,12 +45,17 @@
       button.primary:hover{background:#927cff}
       button.subtle{background:transparent;border-color:transparent;padding:6px 8px;color:#aab3c5}
       button.danger{color:#ffb8b8}
-      #body{display:flex;min-height:0;flex:1;flex-direction:column}
-      nav{order:2;width:100%;flex:none;display:flex;align-items:center;gap:3px;padding:7px;border-right:0;border-top:1px solid #272d3b;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
-      .navbtn{width:auto;flex:none;display:flex;align-items:center;gap:6px;text-align:left;background:transparent;border-color:transparent;color:#aeb6c7;padding:8px 10px;margin:0;font-size:11px;line-height:1.2;white-space:nowrap}
-      .navbtn.active{background:#242b3b;border-color:#343e53;color:#fff}
-      .navbtn span{display:block;flex:none;font-size:14px;margin-bottom:0}
-      main{order:1;flex:1;min-height:0;min-width:0;overflow:auto;padding:17px 18px 24px;scrollbar-width:thin}
+      #body{display:contents}
+      #panel.expanded #body{display:flex;min-height:0;flex:1;flex-direction:column}
+      nav{order:2;width:100%;flex:none;display:flex;align-items:center;gap:5px;padding:9px 12px;border:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+      .navbtn{width:76px;height:62px;flex:0 0 76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;background:#15161c;border:1px solid #42434e;border-radius:13px;color:#f3f3f6;padding:5px 4px;margin:0;font-size:11px;font-weight:650;line-height:1.1;white-space:normal}
+      .navbtn:hover{background:#24232d;border-color:#777086}
+      .navbtn.active{background:#292032;border-color:#b064f5;color:#fff;box-shadow:0 0 0 1px #b064f533}
+      .navbtn .tool-icon{width:22px;height:22px;display:grid;place-items:center;flex:none;color:#f5f3f8}
+      .navbtn .tool-icon svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      .navbtn .tool-label{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      main{display:none;order:1;flex:1;min-height:0;min-width:0;overflow:auto;padding:17px 18px 24px;scrollbar-width:thin}
+      #panel.expanded main{display:block}
       h1{font-size:18px;margin:0 0 5px;line-height:1.25} h2{font-size:13px;margin:18px 0 8px}
       p{color:#aab3c5;margin:4px 0 12px;font-size:12px}
       .muted{color:#939db1;font-size:11px}
@@ -68,14 +75,15 @@
       .status{min-height:18px;color:#b8c5df;font-size:11px;margin-top:7px}
       .preset{padding:7px 9px}.viewport-wrap{height:330px;overflow:auto;background:#262c39;border:1px solid #3b455a;border-radius:9px;padding:9px;display:flex;justify-content:center;align-items:flex-start}
       iframe{border:0;background:white;border-radius:3px;transform-origin:top center;box-shadow:0 8px 30px #0007}
-      #footer{flex:none;border-top:1px solid #272d3b;padding:8px 13px;display:flex;align-items:center;gap:8px;color:#8490a6;font-size:10px}
-      #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#202635;color:#f5f7fb;border:1px solid #414b60;padding:8px 12px;border-radius:9px;box-shadow:0 6px 24px #0008;display:none;pointer-events:none}
+      #footer{display:none;flex:none;border-top:1px solid #272d3b;padding:8px 13px;align-items:center;gap:8px;color:#8490a6;font-size:10px}
+      #panel.expanded #footer{display:flex}
+      #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#202635;color:#f5f7fb;border:1px solid #414b60;padding:8px 12px;border-radius:9px;box-shadow:0 6px 24px #0008;display:none;pointer-events:none}
       .welcome{padding-top:5px}.feature{font-size:11px;color:#c3ccdc;padding:7px 0;border-bottom:1px solid #272d3b}.feature:last-child{border:0}
-      @media(max-width:640px){#panel{width:calc(100vw - 16px);height:min(560px,70vh);bottom:8px}header{height:50px;padding:0 12px}nav{padding:6px}.navbtn{padding:7px 9px;font-size:10px}main{padding:14px 13px 20px}}
+      @media(max-width:640px){#panel{width:calc(100vw - 16px);bottom:8px;border-radius:17px}#panel.expanded{height:min(560px,70vh)}header{height:50px;padding:0 12px}nav{padding:8px}.navbtn{width:72px;height:60px;flex-basis:72px;font-size:10px}main{padding:14px 13px 20px}}
     </style>
     <div id="highlight"></div>
     <section id="panel" role="dialog" aria-label="PageLens website toolkit">
-      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="close" title="Close">✕</button></header>
+      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="close" title="Back to tools">⌄</button></header>
       <div id="body"><nav id="nav"></nav><main id="main"></main></div>
       <div id="footer"><span class="grow">Local page tools · Changes are temporary</span><button class="subtle" data-action="undo">Undo</button></div>
     </section>
@@ -87,8 +95,22 @@
   const nav = shadow.getElementById("nav");
   const highlight = shadow.getElementById("highlight");
   const toast = shadow.getElementById("toast");
-  const state = { tool: "home", selected: null, picking: false, measuring: false, firstPoint: null, history: [], fontStyle: null, responsiveFrame: null };
-  const icons = ["⌖", "▣", "▤", "✦", "▧", "◉", "Aa", "↔", "⌗", "T", "▣", "▱", "↕"];
+  const state = { tool: null, selected: null, picking: false, measuring: false, firstPoint: null, history: [], fontStyle: null, responsiveFrame: null };
+  const icons = [
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M10 8l6 7-3 .2 1.2 3.3-1.8.7-1.3-3.3-2 2z"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="1.5"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 9-9M7 4v4M5 6h4m9-3v5m-2.5-2.5h5M18 13v4m-2-2h4"/><path d="m14 4 1-2 1 2 2 1-2 1-1 2-1-2-2-1z"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M8 13h2l1 4 1-4h2M8 19h7"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-2 3-7 7.8-7 12a7 7 0 0 0 14 0c0-4.2-5-9-7-12z"/><path d="M8 16a4 4 0 0 0 4 3"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M12 5v14M8 19h8"/><path d="m8 9 4-4 4 4"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 8v4M12 8v2M16 8v4M8 16v-2M12 16v-2M16 16v-2"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M12 5v14M8 19h8"/><path d="M6 9h12"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="13" height="11" rx="1.5"/><path d="M7 20h5m-2.5-5v5"/><rect x="18" y="7" width="3" height="13" rx="1"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/></svg>`,
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3 9 6m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3m15-3-3-3m3 3-3 3"/></svg>`
+  ];
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -110,8 +132,8 @@
     return `<div class="kv"><div class="key">${esc(key)}</div><div class="value">${esc(value)}</div></div>`;
   }
   function navMarkup() {
-    nav.innerHTML = `<button class="navbtn ${state.tool === "home" ? "active" : ""}" data-tool="home"><span>⌂</span>Overview</button>` + tools.map((item, i) =>
-      `<button class="navbtn ${state.tool === item[0] ? "active" : ""}" data-tool="${item[0]}"><span>${icons[i]}</span>${esc(item[1])}</button>`).join("");
+    nav.innerHTML = tools.map((item, i) =>
+      `<button class="navbtn ${state.tool === item[0] ? "active" : ""}" data-tool="${item[0]}" title="${esc(item[1])}" aria-label="${esc(item[1])}"><span class="tool-icon">${icons[i]}</span><span class="tool-label">${esc(item[3] || item[1])}</span></button>`).join("");
   }
   function currentInfo() {
     const el = state.selected;
@@ -279,6 +301,8 @@
   }
   function render() {
     navMarkup();
+    panel.classList.toggle("expanded", Boolean(state.tool));
+    if (!state.tool) { main.innerHTML = ""; return; }
     const info = currentInfo();
     const selected = info ? selectedCard() : "";
     const pages = {
@@ -297,7 +321,7 @@
       responsive: `<h1>Responsive viewer</h1><p>Open the current page in a framed preview at a common viewport width.</p><div class="row"><select id="responsive-size"><option value="375">Phone · 375 px</option><option value="430">Large phone · 430 px</option><option value="768">Tablet · 768 px</option><option value="1024">Laptop · 1024 px</option><option value="1280">Desktop · 1280 px</option></select>${button("Load", "load-responsive", true)}</div><div class="viewport-wrap" style="margin-top:10px"><div id="responsive-slot" class="muted">Choose a viewport and load a preview.</div></div><div class="hint" style="margin-top:10px">Some websites block embedded previews. The viewer uses your browser’s normal rendering engine.</div><div class="status"></div>`,
       layout: `<h1>Move & delete</h1><p>Select an element, then move it before or after a sibling or remove it.</p>${button("Pick element", "pick", true)}${selected || ""}${info ? `<div class="stack" style="margin-top:9px">${button("Move earlier", "move-up")}${button("Move later", "move-down")}${button("Remove element", "remove", false, "danger")}</div>` : ""}<div class="hint" style="margin-top:12px">Changes affect this tab only. Use Undo below or reload the page to restore its original layout.</div><div class="status"></div>`
     };
-    main.innerHTML = pages[state.tool] || pages.home;
+    main.innerHTML = pages[state.tool] || "";
     if (state.tool === "responsive" && state.responsiveFrame) {
       const slot = main.querySelector("#responsive-slot");
       if (slot) slot.replaceWith(state.responsiveFrame);
@@ -307,7 +331,7 @@
   nav.addEventListener("click", (event) => {
     const button = event.target.closest("[data-tool]");
     if (!button) return;
-    state.tool = button.dataset.tool;
+    state.tool = state.tool === button.dataset.tool ? null : button.dataset.tool;
     state.responsiveFrame = null;
     render();
   });
@@ -315,7 +339,7 @@
     const button = event.target.closest("[data-action]");
     if (!button) return;
     const action = button.dataset.action;
-    if (action === "close") { host.style.display = "none"; finishPick(); return; }
+    if (action === "close") { state.tool = null; state.responsiveFrame = null; finishPick(); render(); return; }
     if (action === "undo") return undo();
     if (action === "pick") return activatePick();
     if (action === "measure") return activatePick(true);
