@@ -149,7 +149,7 @@
     });
     window.setTimeout(() => {
       const script = document.createElement("script");
-      script.src = "content.js";
+      script.src = "content.js?preview=" + Date.now();
       document.body.appendChild(script);
     }, 0);
   </script>
