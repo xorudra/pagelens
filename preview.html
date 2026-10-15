@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Try every PageLens page tool on a built-in sample page without installing the Chrome extension.">
+  <title>PageLens · Interactive Preview</title>
+  <style>
+    :root{color-scheme:light;--ink:#1d2a25;--muted:#63716a;--paper:#f5f4ef;--green:#23483b;--lime:#d8e581;--line:#d9ddd3;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+    button,a{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .preview-bar{position:fixed;z-index:2147483646;left:16px;top:14px;display:flex;align-items:center;gap:11px;max-width:calc(100vw - 420px);padding:8px 12px;border:1px solid #ffffff40;border-radius:12px;background:#15251feF;color:#f5f5ee;box-shadow:0 8px 30px #17231e35;font-size:11px;line-height:1.25;backdrop-filter:blur(12px)}
+    .preview-mark{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:linear-gradient(135deg,#9a76ff,#45c6d9);color:#11151a;font-weight:900;font-size:14px;flex:none}
+    .preview-copy{min-width:0}.preview-copy strong{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase}.preview-copy span{display:block;margin-top:3px;color:#d0d9d2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .preview-bar button{flex:none;border:1px solid #ffffff45;border-radius:8px;background:#ffffff14;color:#fff;padding:7px 9px;font-size:11px;font-weight:650}.preview-bar button:hover{background:#ffffff25}
+    .hero-wrap{position:relative;overflow:hidden;background:#dfe6d4;min-height:620px;padding:72px 0 56px}
+    .hero-wrap:before{content:"";position:absolute;width:560px;height:560px;border-radius:50%;right:-140px;top:-180px;background:#f0d5a8;opacity:.64}
+    .hero-wrap:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:270px;bottom:-150px;background:#b3c3a7;opacity:.62}
+    .site-nav,.hero,.section,.footer{position:relative;z-index:1;width:min(980px,calc(100% - 56px));margin:0 auto}
+    .site-nav{display:flex;align-items:center;justify-content:space-between;padding:6px 0 50px}
+    .wordmark{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.06em;text-decoration:none}
+    .nav-links{display:flex;align-items:center;gap:27px;font-size:12px}.nav-links a{text-decoration:none;color:#41524a}.nav-links a:hover{text-decoration:underline}
+    .nav-cta{padding:10px 15px;border:0;border-radius:3px;background:var(--green);color:white;text-decoration:none;font-size:12px}
+    .hero{display:grid;grid-template-columns:1.03fr .97fr;gap:38px;align-items:center}
+    .eyebrow{display:flex;align-items:center;gap:9px;color:#4c6558;font-size:10px;font-weight:750;letter-spacing:.16em;text-transform:uppercase}.eyebrow:before{content:"";width:24px;height:1px;background:#718276}
+    h1{max-width:520px;margin:20px 0 17px;font-family:var(--serif);font-size:clamp(46px,6vw,77px);font-weight:400;line-height:.99;letter-spacing:-.055em}
+    .hero-copy{max-width:410px;color:#5a675f;font-size:15px;line-height:1.75}
+    .hero-actions{display:flex;align-items:center;gap:19px;margin-top:28px}.button-primary{display:inline-block;padding:13px 19px;border-radius:3px;background:var(--green);color:white;text-decoration:none;font-size:12px;font-weight:650}.text-link{font-size:12px;text-decoration:underline;text-underline-offset:4px}
+    .hero-art{position:relative;min-height:395px;display:grid;place-items:center}
+    .art-frame{position:relative;width:min(100%,390px);height:370px;overflow:hidden;border-radius:48% 48% 4px 4px;background:linear-gradient(145deg,#b7895f,#efd3a2 57%,#738365);box-shadow:0 20px 45px #53614b26}
+    .sun{position:absolute;right:15%;top:13%;width:93px;height:93px;border-radius:50%;background:#f4e3ba}
+    .art-wall{position:absolute;left:0;right:0;top:0;height:52%;background:linear-gradient(105deg,#a4aa82,#d8bd91);opacity:.58}
+    .art-window{position:absolute;left:14%;top:12%;width:31%;height:47%;border:8px solid #f1e6cf;background:linear-gradient(150deg,#cad7b1,#81967b);box-shadow:0 5px 18px #4a503b32}
+    .plant{position:absolute;left:12%;bottom:10%;width:115px;height:185px}
+    .plant .stem{position:absolute;left:50%;bottom:14%;width:5px;height:67%;background:#364b38;transform:rotate(-5deg)}
+    .leaf{position:absolute;width:48px;height:25px;border-radius:100% 0 100% 0;background:linear-gradient(135deg,#71876a,#324f3d);transform-origin:bottom right}
+    .leaf.l1{left:18px;top:34px;transform:rotate(-45deg)}.leaf.l2{left:48px;top:61px;transform:rotate(18deg) scaleX(-1)}.leaf.l3{left:7px;top:82px;transform:rotate(-24deg)}.leaf.l4{left:49px;top:112px;transform:rotate(20deg) scaleX(-1)}.leaf.l5{left:17px;top:7px;transform:rotate(-53deg) scale(.8)}
+    .pot{position:absolute;bottom:0;left:26px;width:62px;height:63px;border-radius:5px 5px 22px 22px;background:#bd7654;box-shadow:inset -9px 0 #9f5f47}
+    .chair{position:absolute;right:15%;bottom:12%;width:130px;height:128px}
+    .chair-back{position:absolute;right:9px;top:0;width:86px;height:76px;border-radius:44px 44px 12px 12px;background:linear-gradient(95deg,#c17b54,#dfaa79);box-shadow:inset -12px 0 #ad6f4d}
+    .chair-seat{position:absolute;right:0;top:66px;width:122px;height:30px;border-radius:6px;background:#b77550;transform:skew(-8deg)}
+    .chair-leg{position:absolute;top:89px;right:18px;width:7px;height:52px;background:#604839;transform:rotate(3deg)}.chair-leg.back{right:103px;transform:rotate(-4deg)}
+    .table{position:absolute;bottom:8%;left:39%;width:104px;height:118px}
+    .table-top{position:absolute;top:39px;width:104px;height:16px;border-radius:50%;background:#754e36;box-shadow:inset 0 3px #a77750}
+    .table-leg{position:absolute;top:50px;left:49px;width:7px;height:59px;background:#674931}
+    .mug{position:absolute;top:20px;left:34px;width:30px;height:24px;border-radius:3px 3px 10px 10px;background:#f1e7d2}.mug:after{content:"";position:absolute;right:-9px;top:3px;width:10px;height:13px;border:3px solid #f1e7d2;border-left:0;border-radius:0 9px 9px 0}
+    .art-caption{position:absolute;right:-4px;bottom:14px;padding:9px 12px;background:#f7f2e9;color:#536255;font-family:var(--serif);font-size:13px;box-shadow:0 6px 18px #39463b20;transform:rotate(-3deg)}
+    .proof{display:flex;align-items:center;gap:22px;margin-top:36px;color:#526358;font-size:10px}.proof strong{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--green)}
+    .section{padding:92px 0 86px}.section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:29px}.section-heading h2{margin:0;font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-.04em}.section-heading p{max-width:300px;margin:0;color:var(--muted);font-size:12px}
+    .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.product{border:1px solid var(--line);background:#fbfaf6;padding:10px 10px 15px}.product-art{height:180px;position:relative;overflow:hidden;background:linear-gradient(140deg,#ded6c2,#b8b28e)}.product:nth-child(2) .product-art{background:linear-gradient(140deg,#d7c2ab,#e7dbc6)}.product:nth-child(3) .product-art{background:linear-gradient(140deg,#c3cbb7,#e2d7bf)}
+    .product-art svg{display:block;width:100%;height:100%}.product h3{margin:13px 0 2px;font-family:var(--serif);font-size:19px;font-weight:400}.product p{margin:0;color:var(--muted);font-size:11px}.price{float:right;color:#405348;font-size:12px}
+    .story{display:grid;grid-template-columns:.95fr 1.05fr;gap:55px;align-items:center;padding:78px 0}.story-art{min-height:280px;background:linear-gradient(135deg,#d8c9aa,#b6c2a6);display:grid;place-items:center;position:relative;overflow:hidden}.story-art svg{width:82%;max-width:350px}.story h2{margin:13px 0;font-family:var(--serif);font-size:42px;font-weight:400;line-height:1.04;letter-spacing:-.045em}.story p{color:var(--muted);font-size:13px;line-height:1.8}.story .text-link{display:inline-block;margin-top:8px}
+    .quote{padding:53px 34px;text-align:center;background:#e8e9de}.quote blockquote{max-width:650px;margin:0 auto 16px;font-family:var(--serif);font-size:clamp(22px,3vw,34px);line-height:1.25}.quote cite{font-size:10px;font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:#596a5d}
+    .footer{padding:38px 0 48px;display:flex;justify-content:space-between;gap:24px;color:#66736b;font-size:10px}.footer strong{font-family:var(--serif);font-size:17px;color:var(--ink)}
+    .preview-toast{position:fixed;left:18px;bottom:17px;z-index:2147483646;max-width:min(410px,calc(100vw - 36px));padding:11px 14px;border:1px solid #bbd0a6;border-radius:9px;background:#f4f8eb;color:#344a3a;box-shadow:0 8px 24px #16251d25;font-size:12px;display:none}
+    @media(max-width:760px){.preview-bar{max-width:calc(100vw - 32px);right:16px}.preview-copy span{max-width:42vw}.hero-wrap{padding-top:81px}.site-nav,.hero,.section,.footer{width:min(100% - 32px,540px)}.site-nav{padding-bottom:34px}.nav-links{gap:12px}.nav-links a:not(.nav-cta){display:none}.hero{grid-template-columns:1fr;gap:13px}.hero-art{min-height:300px}.art-frame{height:295px;max-width:330px}.proof{gap:12px;flex-wrap:wrap}.section{padding:65px 0}.section-heading{align-items:start;flex-direction:column}.section-heading h2{font-size:32px}.product-grid{grid-template-columns:1fr}.product-art{height:220px}.story{grid-template-columns:1fr;gap:23px;padding:36px 0}.story h2{font-size:35px}.footer{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="preview-bar" role="status">
+    <div class="preview-mark">P</div>
+    <div class="preview-copy"><strong>PageLens · Live Preview</strong><span>Real extension tools, running on this sample page. No install needed.</span></div>
+    <button type="button" id="open-tools">Open PageLens</button>
+  </div>
+  <div class="preview-toast" id="preview-toast" role="status"></div>
+
+  <header class="hero-wrap">
+    <nav class="site-nav" aria-label="Sample shop navigation">
+      <a class="wordmark" href="#top">morrow.</a>
+      <div class="nav-links"><a href="#collection">Shop</a><a href="#story">Our approach</a><a href="#journal">Journal</a><a class="nav-cta" href="#collection">Explore pieces</a></div>
+    </nav>
+    <section class="hero" id="top">
+      <div>
+        <div class="eyebrow">Thoughtful pieces for everyday living</div>
+        <h1>Make room for a slower kind of home.</h1>
+        <p class="hero-copy">Considered furniture, honest materials, and small details that make the everyday feel a little more special.</p>
+        <div class="hero-actions"><a class="button-primary" href="#collection">Shop the collection</a><a class="text-link" href="#story">Meet Morrow</a></div>
+        <div class="proof"><span><strong>01</strong> Made to last</span><span><strong>02</strong> Natural materials</span><span><strong>03</strong> Thoughtfully made</span></div>
+      </div>
+      <div class="hero-art" aria-label="Illustration of a calm, plant-filled living room">
+        <div class="art-frame">
+          <div class="art-wall"></div><div class="sun"></div><div class="art-window"></div>
+          <div class="plant"><span class="stem"></span><span class="leaf l1"></span><span class="leaf l2"></span><span class="leaf l3"></span><span class="leaf l4"></span><span class="leaf l5"></span><span class="pot"></span></div>
+          <div class="table"><span class="mug"></span><span class="table-top"></span><span class="table-leg"></span></div>
+          <div class="chair"><span class="chair-back"></span><span class="chair-seat"></span><span class="chair-leg"></span><span class="chair-leg back"></span></div>
+        </div><div class="art-caption">A little more room to breathe.</div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="section" id="collection">
+      <div class="section-heading"><div><div class="eyebrow">The collection</div><h2>Made for the moments in between.</h2></div><p>Useful, beautiful pieces designed to find their place in your home and stay there.</p></div>
+      <div class="product-grid">
+        <article class="product">
+          <div class="product-art"><svg viewBox="0 0 360 200" role="img" aria-label="Illustration of a wooden chair"><ellipse cx="184" cy="181" rx="113" ry="10" fill="#68715a" opacity=".28"/><path d="M130 51 Q130 31 151 31h65q22 0 22 22v52H130z" fill="#bd8056"/><path d="M126 99h124l13 18H117z" fill="#a96d49"/><path d="M137 114l-8 66h11l16-63m90-3 14 66h11l-12-70" fill="#604a38"/><path d="M149 42h73" stroke="#dca47a" stroke-width="5" opacity=".7"/></svg></div>
+          <h3>Sunday lounge chair <span class="price">$640</span></h3><p>Solid ash · warm oak</p>
+        </article>
+        <article class="product">
+          <div class="product-art"><svg viewBox="0 0 360 200" role="img" aria-label="Illustration of a round side table"><ellipse cx="180" cy="178" rx="110" ry="9" fill="#766b5a" opacity=".22"/><path d="M91 75q89-34 178 0v15q-89 34-178 0z" fill="#865e42"/><ellipse cx="180" cy="75" rx="89" ry="24" fill="#b3845e"/><path d="M170 92h20l20 75h-17l-13-49-13 49h-17z" fill="#69503a"/><circle cx="180" cy="67" r="3" fill="#e1bd91"/></svg></div>
+          <h3>Stillwater side table <span class="price">$320</span></h3><p>Hand-finished · walnut</p>
+        </article>
+        <article class="product">
+          <div class="product-art"><svg viewBox="0 0 360 200" role="img" aria-label="Illustration of a ceramic table lamp"><ellipse cx="180" cy="179" rx="91" ry="9" fill="#62685b" opacity=".2"/><path d="M119 84h122l-18-54h-86z" fill="#e6dac0"/><path d="M131 80h98" stroke="#d0c0a2" stroke-width="4"/><path d="M162 83h36l8 70q-25 15-52 0z" fill="#b47656"/><ellipse cx="180" cy="157" rx="38" ry="9" fill="#925c45"/><path d="M150 151q30 9 60 0" fill="none" stroke="#d99c73" stroke-width="3"/></svg></div>
+          <h3>Evening glow lamp <span class="price">$280</span></h3><p>Soft linen · hand-thrown base</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section story" id="story">
+      <div class="story-art"><svg viewBox="0 0 360 250" role="img" aria-label="Illustration of a shelf and potted plant"><rect x="70" y="50" width="220" height="12" rx="2" fill="#70543d"/><rect x="87" y="60" width="9" height="132" fill="#725740"/><rect x="264" y="60" width="9" height="132" fill="#725740"/><rect x="73" y="184" width="214" height="11" rx="2" fill="#70543d"/><path d="M168 146v-62m0 22q-36-35-42-8 8 18 42 17m0-15q36-39 45-11-5 20-45 20m-1-10q-29-31-34-50 23 4 36 35m0 24q30-31 40-50-24 2-40 34" fill="#48684c" stroke="#48684c" stroke-width="4"/><path d="M145 145h47l-6 39h-35z" fill="#b77b5a"/><rect x="106" y="137" width="42" height="39" rx="2" fill="#d5c7a9"/><path d="M115 137v-22h20v22m-11-22 10-11m-10 11-8-12" fill="none" stroke="#f4efe3" stroke-width="5"/></svg></div>
+      <div><div class="eyebrow">A little more intentional</div><h2>Good design should feel good to live with.</h2><p>We work with small workshops and responsible makers to create enduring pieces from materials that age beautifully. Every detail has a reason to be there.</p><a class="text-link" href="#journal">Read our story</a></div>
+    </section>
+    <section class="section quote" id="journal"><blockquote>“The pieces that matter most are the ones that quietly become part of your everyday.”</blockquote><cite>Notes from the Morrow studio</cite></section>
+  </main>
+  <footer class="footer"><strong>morrow.</strong><span>Considered objects for considered living.</span><span>Sample website for PageLens · Preview only</span></footer>
+
+  <script>
+    // Provide only the Chrome APIs used by PageLens. Browser-only capture is unavailable here.
+    window.chrome = window.chrome || {};
+    window.chrome.runtime = window.chrome.runtime || {
+      lastError: null,
+      onMessage: { addListener() {} },
+      sendMessage(message, callback) {
+        if (message?.type === "pagelens:capture-visible") {
+          this.lastError = { message: "Screenshot capture requires the installed extension. All other page tools are available in this preview." };
+          callback?.({ ok: false, error: this.lastError.message });
+          this.lastError = null;
+          return;
+        }
+        if (message?.type === "pagelens:download-url") {
+          const link = document.createElement("a");
+          link.href = message.url;
+          link.download = `${message.filename || "pagelens-asset"}`;
+          link.rel = "noopener";
+          link.click();
+          callback?.({ ok: true });
+        }
+      }
+    };
+    document.getElementById("open-tools").addEventListener("click", () => {
+      const script = document.createElement("script");
+      script.src = "content.js?preview=" + Date.now();
+      document.body.appendChild(script);
+    });
+    window.setTimeout(() => {
+      const script = document.createElement("script");
+      script.src = "content.js";
+      document.body.appendChild(script);
+    }, 0);
+  </script>
+</body>
+</html>
