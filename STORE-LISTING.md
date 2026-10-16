@@ -2,7 +2,7 @@
 
 ## Name
 
-PageLens — Website Design Toolkit
+PageLens
 
 ## Short description
 

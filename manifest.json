@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "PageLens — Website Design Toolkit",
+  "name": "PageLens",
   "version": "0.2.0",
   "description": "Inspect pages, compare responsive views, annotate screenshots, collect design details, and preview edits.",
   "homepage_url": "https://github.com/xorudra/pagelens",

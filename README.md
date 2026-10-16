@@ -33,7 +33,7 @@ Screenshot capture requires the installed extension because the browser preview 
 
 ## Install in Chrome
 
-1. [Download PageLens 0.2.0](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens-0.2.0.zip) and extract the ZIP.
+1. [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens-0.2.0.zip) and extract the ZIP.
 2. In Chrome, open `chrome://extensions`, turn on **Developer mode**, then choose **Load unpacked**.
 3. Select the extracted PageLens folder whose top level contains `manifest.json`. The folder picker selects a folder, so `manifest.json` will not appear as a selectable file; select that folder and click **Select Folder**.
 4. Open a website and click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
