@@ -10,7 +10,9 @@ Inspect page elements, colors, typography, spacing, and assets. Export design no
 
 ## Detailed description
 
-PageLens is a browser-based toolkit for understanding page design while you browse. On the tab you open, inspect and measure elements, review HTML and computed CSS, collect colors, typography, and assets, and create a static HTML snapshot or Markdown design notes. Preview temporary text and layout edits, capture a visible area, full page, area, or element, crop and annotate captures, and export PNG or PDF. Compare responsive previews side by side and customize the toolbar layout and order.
+PageLens is a browser-based toolkit for understanding page design while you browse. Pick an element to preview it safely and inspect its HTML and computed CSS. Preview a rendered page snapshot before downloading its HTML, styles, and accessible assets. Build a visual Design MD reference or a structured design prompt, collect colors, inspect typography by hovering over text, and filter or bundle page assets.
+
+Preview temporary text and layout edits, measure dimensions and spacing, and undo page experiments. Capture a visible area, full page, snip, or element; wait for lazy content, crop, annotate, blur, add a frame or background, and export PNG, JPG, WebP, or PDF. Compare responsive previews at built-in or custom widths, adjust their scale, arrange them, and save reference screenshots. Choose a bottom dock or sidebar and reorder the toolbar.
 
 PageLens starts only when you click its toolbar button and processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Swap Fonts loads the public family list from Google's fonts repository when opened; applying a Google font requests it from Google Fonts. Clone Page fetches assets directly from their source hosts when browser access permits. Files are saved only when you choose an export or download action.
 

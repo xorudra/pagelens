@@ -12,7 +12,7 @@ After you click the PageLens toolbar button, the extension reads information fro
 
 PageLens processes page information in your browser. It does not transmit page content, page addresses, screenshots, or generated notes to a PageLens server. PageLens has no account service, analytics, advertising, or remote storage, and it does not retain page data after the tab session ends. Toolbar position, tool order, and capture defaults are saved in Chrome's local extension storage.
 
-When you choose an export, screenshot, or asset download, PageLens asks Chrome to save the requested file to your device. Clone Page can fetch up to 45 page assets for the ZIP, with per-file and total size limits. The browser requests those files directly from their source hosts; cross-origin restrictions may prevent a file from being included. Those requests are handled by your browser and the asset hosts, not by a PageLens server.
+When you choose an export, screenshot, or asset download, PageLens asks Chrome to save the requested file to your device. Clone Page can fetch up to 45 page assets for the ZIP, with per-file and total size limits. The asset collection tool can bundle up to 40 selected files, with a 1.5 MB per-file limit and an 8 MB total limit. The browser requests those files directly from their source hosts; cross-origin restrictions may prevent a file from being included. Those requests are handled by your browser and the asset hosts, not by a PageLens server.
 
 ## Sharing and third parties
 

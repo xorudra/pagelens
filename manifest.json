@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PageLens",
   "version": "0.2.0",
-  "description": "Inspect pages, compare responsive views, annotate screenshots, collect design details, and preview edits.",
+  "description": "Inspect, preview, measure, and capture page designs. Collect assets, colors, typography, and layout references.",
   "homepage_url": "https://github.com/xorudra/pagelens",
   "icons": {
     "16": "icon16.png",

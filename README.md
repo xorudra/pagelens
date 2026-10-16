@@ -4,25 +4,26 @@ PageLens is a Manifest V3 Chrome extension for inspecting page design and collec
 
 ## Included tools
 
-- Pick an element and inspect or copy its HTML and computed CSS
-- Download a page UI snapshot ZIP with HTML, CSS, and assets the source site allows PageLens to fetch
-- Generate a Design MD reference or a design prompt
-- Find images, SVGs, videos, and CSS background assets
-- Extract a page color palette and typography styles
+- Pick an element, preview it safely, and copy or save its HTML and computed CSS
+- Preview a rendered page snapshot, then download a ZIP with HTML, CSS, and assets the source site allows PageLens to fetch
+- Generate a visual Design MD reference with colors, typography, and spacing, or create a structured design prompt
+- Filter and search images, SVGs, video, and CSS backgrounds; copy URLs, save one file, or bundle selected assets
+- Extract a page color palette and typography styles; hover over text to inspect font family, size, weight, and line height
 - Preview popular or custom Google Fonts across the page, headings, body text, or a selected element
-- Inspect element size, spacing, and point-to-point distance
-- Preview text edits, reorder or remove elements, and undo recent edits
-- Capture a visible area, full page, selected area, or selected element; crop, draw annotations, and export PNG or PDF
-- Compare side-by-side responsive previews at phone, tablet, laptop, and desktop widths
+- Inspect element size, spacing, computed styles, and point-to-point distance
+- Preview text edits, reorder or remove elements, and undo recent page edits
+- Capture visible, full-page, selected-area, or selected-element screenshots; wait for lazy content, cancel a long capture, crop, annotate, blur, and add a frame or background
+- Export captures as PNG, JPG, WebP, or PDF
+- Compare responsive previews at built-in or custom widths; arrange previews, adjust their scale, and save a viewport reference image
 - Choose a bottom dock or right sidebar, reorder tools, and save capture and viewport defaults
 
-PageLens processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Swap Fonts loads the public Google Fonts family list from Google's fonts repository when opened; applying a font requests it from Google Fonts. Clone Page can request accessible image and media files directly from their source hosts; cross-origin restrictions may prevent some from being copied. Preferences are stored locally by Chrome. See the [Privacy Policy](PRIVACY.md).
+PageLens processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Swap Fonts loads the public Google Fonts family list from Google's fonts repository when opened; applying a font requests it from Google Fonts. Clone Page and asset bundles can request files directly from their source hosts; cross-origin restrictions and size limits may prevent some from being copied. Preferences are stored locally by Chrome. See the [Privacy Policy](PRIVACY.md).
 
 ## Preview without installing
 
 Open the [live PageLens preview](https://xorudra.github.io/pagelens/preview.html). It runs the same `content.js` used by the extension on a built-in sample website. Use the toolbar centered along the bottom by default, or switch to a right sidebar in Workspace settings.
 
-Screenshot capture requires the installed extension because the browser preview cannot access Chrome’s screenshot API. The preview can save workspace settings in this browser.
+Screenshot capture and responsive reference capture require the installed extension because the browser preview cannot access Chrome’s screenshot API. The preview can show the tools and save workspace settings in this browser.
 
 ## Permissions
 
@@ -42,7 +43,7 @@ If you already installed an earlier ZIP, download and extract the updated ZIP, t
 
 If the page says **Upload package**, choose the ZIP file instead of a folder.
 
-Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and assets that allow a browser fetch; blocked assets stay at their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.
+Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Full-page capture is limited to 40 screens and may repeat sticky elements. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and assets that allow a browser fetch; blocked assets stay at their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.
 
 ## Chrome Web Store listing
 
