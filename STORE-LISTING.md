@@ -10,7 +10,7 @@ Inspect page elements, colors, typography, spacing, and assets. Export design no
 
 ## Detailed description
 
-PageLens is a browser-based toolkit for understanding page design while you browse. Pick an element to preview it safely and inspect its HTML and computed CSS. Preview a rendered page snapshot before downloading its HTML, styles, and accessible assets. Build a visual Design MD reference or a structured design prompt, collect colors, inspect typography by hovering over text, and filter or bundle page assets.
+PageLens is a browser-based toolkit for understanding page design while you browse. Pick an element to preview it safely and inspect its HTML and computed CSS. Preview a rendered page snapshot, inspect the generated HTML and CSS, then download a ZIP with accessible assets. Build a visual Design MD reference or a structured design prompt, collect colors, inspect typography by hovering over text, and filter or bundle page assets.
 
 Preview temporary text and layout edits, measure dimensions and spacing, and undo page experiments. Capture a visible area, full page, snip, or element; wait for lazy content, crop, annotate, blur, add a frame or background, and export PNG, JPG, WebP, or PDF. Compare responsive previews at built-in or custom widths, adjust their scale, arrange them, and save reference screenshots. Choose a bottom dock or sidebar and reorder the toolbar.
 

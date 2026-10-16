@@ -5,7 +5,7 @@ PageLens is a Manifest V3 Chrome extension for inspecting page design and collec
 ## Included tools
 
 - Pick an element, preview it safely, and copy or save its HTML and computed CSS
-- Preview a rendered page snapshot, then download a ZIP with HTML, CSS, and assets the source site allows PageLens to fetch
+- Preview a rendered page snapshot, inspect its generated HTML and CSS, then download a ZIP with assets the source site allows PageLens to fetch
 - Generate a visual Design MD reference with colors, typography, and spacing, or create a structured design prompt
 - Filter and search images, SVGs, video, and CSS backgrounds; copy URLs, save one file, or bundle selected assets
 - Extract a page color palette and typography styles; hover over text to inspect font family, size, weight, and line height
