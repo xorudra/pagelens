@@ -1,6 +1,17 @@
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id) return;
   try {
+    // User-origin !important rules outrank page styles that hide the toolbar.
+    try {
+      await chrome.scripting.insertCSS({
+        target: { tabId: tab.id },
+        files: ["host.css"],
+        origin: "USER"
+      });
+    } catch (error) {
+      // Keep the regular inline-style fallback available on restricted pages.
+      console.debug("PageLens host protection stylesheet was unavailable.", error);
+    }
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["content.js"]

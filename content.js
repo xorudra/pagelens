@@ -1,7 +1,46 @@
 (() => {
+  // Cosmetic filters can collapse injected overlays with !important rules.
+  // Keep PageLens's viewport host usable while leaving page styles untouched.
+  function protectHost(host) {
+    const protectedStyles = {
+      display: "block",
+      visibility: "visible",
+      opacity: "1",
+      position: "fixed",
+      inset: "0",
+      "z-index": "2147483647",
+      "pointer-events": "none",
+      width: "100vw",
+      height: "100vh",
+      "max-width": "none",
+      "max-height": "none",
+      "box-sizing": "border-box",
+      overflow: "visible",
+      clip: "auto",
+      "clip-path": "none",
+      transform: "none"
+    };
+    for (const [property, value] of Object.entries(protectedStyles)) {
+      host.style.setProperty(property, value, "important");
+    }
+  }
+
   const existing = document.getElementById("pagelens-extension-root");
   if (existing) {
-    existing.style.display = existing.style.display === "none" ? "block" : "none";
+    const computed = getComputedStyle(existing);
+    const hiddenByPage = computed.display === "none"
+      || computed.visibility === "hidden"
+      || Number(computed.opacity) === 0
+      || computed.width === "0px"
+      || computed.height === "0px";
+    const currentlyOpen = existing.dataset.pagelensOpen !== "false";
+    const shouldOpen = !currentlyOpen || hiddenByPage;
+    if (shouldOpen) {
+      protectHost(existing);
+      existing.dataset.pagelensOpen = "true";
+    } else {
+      existing.dataset.pagelensOpen = "false";
+    }
     return;
   }
 
@@ -24,6 +63,8 @@
   const host = document.createElement("div");
   host.id = "pagelens-extension-root";
   host.style.cssText = "all:initial;position:fixed;inset:0;z-index:2147483647;pointer-events:none;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;font-size:14px;line-height:1.45;color:#f5f5fa";
+  host.dataset.pagelensOpen = "true";
+  protectHost(host);
   document.documentElement.appendChild(host);
   const shadow = host.attachShadow({ mode: "open" });
 
@@ -555,7 +596,7 @@
     try {
       setStatus(mode === "full" ? "Capturing and stitching page frames…" : "Capturing page…");
       if (target) target.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
-      host.style.visibility = "hidden";
+      host.dataset.pagelensCapturing = "true";
       let canvas;
       if (mode === "full") {
         const pageHeight = Math.min(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight), Math.floor(12000 / Math.max(1, devicePixelRatio)));
@@ -594,7 +635,7 @@
     } catch (error) {
       setStatus(error.message || "Screenshot failed. Try a normal website tab.");
     } finally {
-      host.style.visibility = "visible";
+      delete host.dataset.pagelensCapturing;
       window.scrollTo(oldX, oldY);
     }
   }
@@ -866,8 +907,8 @@
   }, true);
 
   chrome.runtime.onMessage.addListener((message) => {
-    if (message?.type === "pagelens:hide-for-capture") host.style.visibility = "hidden";
-    if (message?.type === "pagelens:restore-after-capture") host.style.visibility = "visible";
+    if (message?.type === "pagelens:hide-for-capture") host.dataset.pagelensCapturing = "true";
+    if (message?.type === "pagelens:restore-after-capture") delete host.dataset.pagelensCapturing;
   });
 
   render();

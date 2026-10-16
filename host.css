@@ -1,0 +1,36 @@
+/*
+ * Injected at the user origin so page and ad-filter author styles cannot hide
+ * the PageLens host. The closed/capturing states remain controlled by attributes.
+ */
+#pagelens-extension-root {
+  all: initial !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  transform: none !important;
+  contain: none !important;
+  content-visibility: visible !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+#pagelens-extension-root[data-pagelens-open="false"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+#pagelens-extension-root[data-pagelens-capturing="true"] {
+  visibility: hidden !important;
+}

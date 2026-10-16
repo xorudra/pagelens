@@ -38,6 +38,8 @@ Screenshot capture requires the installed extension because the browser preview 
 3. Select the extracted PageLens folder whose top level contains `manifest.json`. The folder picker selects a folder, so `manifest.json` will not appear as a selectable file; select that folder and click **Select Folder**.
 4. Open a website and click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
 
+If you already installed an earlier ZIP, download and extract the updated ZIP, then click **Reload** for PageLens on `chrome://extensions` so Chrome uses the fixed files.
+
 If the page says **Upload package**, choose the ZIP file instead of a folder.
 
 Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and assets that allow a browser fetch; blocked assets stay at their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.

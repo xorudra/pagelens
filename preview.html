@@ -156,7 +156,9 @@
     const openTools = () => {
       const existing = document.getElementById("pagelens-extension-root");
       if (existing) {
-        existing.style.display = "block";
+        existing.dataset.pagelensOpen = "true";
+        existing.style.setProperty("display", "block", "important");
+        existing.style.setProperty("visibility", "visible", "important");
         return;
       }
       if (document.getElementById("pagelens-preview-script")) return;
