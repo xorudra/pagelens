@@ -39,6 +39,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === "pagelens:capture-frame") {
+    chrome.tabs.captureVisibleTab(sender.tab.windowId, { format: "png" })
+      .then((dataUrl) => sendResponse({ ok: true, dataUrl }))
+      .catch((error) => sendResponse({ ok: false, error: error.message || "Capture failed." }));
+    return true;
+  }
+
   if (message.type === "pagelens:download-url") {
     chrome.downloads.download({
       url: message.url,

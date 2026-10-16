@@ -10,13 +10,13 @@ After you click the PageLens toolbar button, the extension reads information fro
 
 ## Local processing and downloads
 
-PageLens processes page information in your browser. It does not transmit page content, page addresses, screenshots, or generated notes to a PageLens server. The extension does not have an account service, analytics, advertising, or remote storage, and it does not retain page data after the tab session ends.
+PageLens processes page information in your browser. It does not transmit page content, page addresses, screenshots, or generated notes to a PageLens server. PageLens has no account service, analytics, advertising, or remote storage, and it does not retain page data after the tab session ends. Toolbar position, tool order, and capture defaults are saved in Chrome's local extension storage.
 
-When you choose an export, screenshot, or asset download, PageLens asks Chrome to save the requested file to your device. If you choose to download an asset hosted by the page, Chrome requests that asset from the website that hosts it. That request is handled by Chrome and the asset host, not by a PageLens server.
+When you choose an export, screenshot, or asset download, PageLens asks Chrome to save the requested file to your device. Clone Page can fetch up to 45 page assets for the ZIP, with per-file and total size limits. The browser requests those files directly from their source hosts; cross-origin restrictions may prevent a file from being included. Those requests are handled by your browser and the asset hosts, not by a PageLens server.
 
 ## Sharing and third parties
 
-PageLens does not sell or share page information with the developer or other third parties. Chrome provides the browser APIs used to access the active tab and save downloads. Websites you visit and asset hosts operate under their own privacy policies when your browser requests their pages or files.
+PageLens does not sell or share page information with the developer. When you open Swap Fonts, the browser retrieves the public font family list from Google's fonts repository on GitHub. When you apply a Google Fonts family, the browser requests the font stylesheet and font files from Google Fonts; that request reveals the selected family to Google and is governed by Google's privacy terms. These requests do not include the page's text or screenshot. Chrome provides the browser APIs used to access the active tab and save downloads. Websites and asset hosts operate under their own privacy policies when your browser requests their pages or files.
 
 ## Your choices
 

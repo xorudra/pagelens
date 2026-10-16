@@ -10,9 +10,9 @@ Inspect page elements, colors, typography, spacing, and assets. Export design no
 
 ## Detailed description
 
-PageLens is a browser-based toolkit for understanding page design while you browse. On the tab you open, inspect and measure elements, review HTML and computed CSS, collect colors, typography, and asset references, and create a static HTML snapshot or Markdown design notes. Preview temporary text and layout edits, capture a visible-tab PNG, and open a responsive viewport preview.
+PageLens is a browser-based toolkit for understanding page design while you browse. On the tab you open, inspect and measure elements, review HTML and computed CSS, collect colors, typography, and assets, and create a static HTML snapshot or Markdown design notes. Preview temporary text and layout edits, capture a visible area, full page, area, or element, crop and annotate captures, and export PNG or PDF. Compare responsive previews side by side and customize the toolbar layout and order.
 
-PageLens starts only when you click its toolbar button and processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Files are saved only when you choose an export or download action.
+PageLens starts only when you click its toolbar button and processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Swap Fonts loads the public family list from Google's fonts repository when opened; applying a Google font requests it from Google Fonts. Clone Page fetches assets directly from their source hosts when browser access permits. Files are saved only when you choose an export or download action.
 
 Some pages, including Chrome internal pages and Chrome Web Store pages, cannot be inspected. Sites may block an embedded responsive preview. Static snapshots do not reproduce a site's backend or application behavior. Use collected content and assets only when you have permission.
 
@@ -32,7 +32,8 @@ Some pages, including Chrome internal pages and Chrome Web Store pages, cannot b
 - `activeTab`: limit page access to the tab the user explicitly opens PageLens on.
 - `scripting`: inject PageLens's inspection interface after the user clicks its toolbar button.
 - `downloads`: save a screenshot, export, or selected asset only when the user chooses that action.
+- `storage`: save local workspace preferences such as toolbar position, tool order, and preview defaults.
 
 ## Privacy practices draft
 
-PageLens reads website content and the current page address locally to provide user-facing inspection and export features. It does not collect or transmit that information to the developer or another service. Confirm the exact available checkboxes in the Chrome Web Store Privacy practices form before submission.
+PageLens reads website content and the current page address locally to provide inspection and export features. It does not send page content, page addresses, screenshots, or notes to the developer or a PageLens server. Opening Swap Fonts requests a public font family list from Google's fonts repository; applying a font makes a request to Google Fonts, and Clone Page may request selected assets from their source hosts. Confirm the exact available checkboxes in the Chrome Web Store Privacy practices form before submission.

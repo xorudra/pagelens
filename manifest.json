@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "PageLens — Website Design Toolkit",
-  "version": "0.1.0",
-  "description": "Inspect page elements, colors, typography, spacing, and assets. Export design notes and preview edits on the current tab.",
+  "version": "0.2.0",
+  "description": "Inspect pages, compare responsive views, annotate screenshots, collect design details, and preview edits.",
   "homepage_url": "https://github.com/xorudra/pagelens",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
-  "permissions": ["activeTab", "scripting", "downloads"],
+  "permissions": ["activeTab", "scripting", "downloads", "storage"],
   "background": {
     "service_worker": "background.js"
   },

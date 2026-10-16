@@ -33,6 +33,11 @@
       *{box-sizing:border-box}
       #panel{position:fixed;left:50%;right:auto;top:auto;bottom:12px;transform:translateX(-50%);width:min(1120px,calc(100vw - 24px));height:auto;max-height:calc(100vh - 24px);background:var(--pl-panel);color:var(--pl-text);border:1px solid #b58cffaa;border-radius:18px;box-shadow:0 22px 70px #0009,0 0 0 1px #b58cff1f;backdrop-filter:blur(18px);pointer-events:auto;display:flex;flex-direction:column;overflow:hidden;font-size:14px;font-weight:500;line-height:1.45;letter-spacing:-.01em}
       #panel.expanded{height:auto;max-height:min(680px,calc(100vh - 24px))}
+      #panel.sidebar{left:auto;right:12px;top:12px;bottom:12px;transform:none;width:min(900px,calc(100vw - 24px));height:calc(100vh - 24px);max-height:none}
+      #panel.sidebar.expanded{height:calc(100vh - 24px);max-height:none}
+      #panel.sidebar:not(.expanded){left:auto;right:12px;top:50%;bottom:auto;transform:translateY(-50%);width:90px;height:auto;max-height:calc(100vh - 24px)}
+      #panel.sidebar:not(.expanded) #body{display:flex;flex-direction:column}
+      #panel.sidebar:not(.expanded) nav{width:90px;flex:0 0 auto;max-height:70vh}
       #highlight{position:fixed;display:none;border:2px solid #6e9bff;background:#6e9bff22;border-radius:4px;pointer-events:none;z-index:0}
       header{display:none;height:54px;flex:none;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--pl-line);background:#15161d}
       #panel.expanded header{display:flex}
@@ -49,6 +54,7 @@
       button.danger{color:#ffb8b8}
       #body{display:contents}
       #panel.expanded #body{display:flex;min-height:0;flex:0 1 auto;flex-direction:column}
+      #panel.sidebar.expanded #body{flex:1;min-height:0;flex-direction:row}
       nav{order:2;width:100%;flex:none;display:flex;align-items:center;gap:6px;padding:10px 12px;border:0;background:#121319;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#555060 transparent;scroll-snap-type:x proximity}
       .navbtn{width:78px;height:64px;flex:0 0 78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;background:#191a22;border:1px solid #383943;border-radius:12px;color:#eeedf5;padding:5px 4px;margin:0;font-size:12px;font-weight:700;line-height:1.2;letter-spacing:-.015em;white-space:normal;scroll-snap-align:center}
       .navbtn:hover{background:#252630;border-color:#777389}
@@ -58,6 +64,9 @@
       .navbtn .tool-label{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       main{display:none;order:1;flex:0 1 auto;min-height:0;min-width:0;max-height:min(480px,calc(100vh - 210px));overflow:auto;padding:19px 22px 20px;scrollbar-width:thin;scrollbar-color:#555060 transparent}
       #panel.expanded main{display:block}
+      #panel.sidebar main{order:2;flex:1;max-height:none;min-height:0}
+      #panel.sidebar nav{order:1;width:90px;flex:0 0 90px;flex-direction:column;align-items:stretch;overflow-x:hidden;overflow-y:auto;scroll-snap-type:y proximity;border-right:1px solid var(--pl-line)}
+      #panel.sidebar .navbtn{width:100%;height:62px;flex:0 0 62px}
       h1{font-size:20px;font-weight:750;letter-spacing:-.025em;margin:0 0 7px;line-height:1.2} h2{font-size:15px;font-weight:700;letter-spacing:-.015em;margin:20px 0 9px;line-height:1.35}
       p{color:var(--pl-muted);margin:5px 0 15px;font-size:14px;font-weight:500;line-height:1.45;letter-spacing:0}
       .muted{color:#c2c4d0;font-size:13px;font-weight:500;line-height:1.45}
@@ -76,16 +85,26 @@
       .asset img{width:36px;height:30px;object-fit:cover;border-radius:4px;background:#252b39}
       .status{min-height:18px;color:#d7d8e2;font-size:13px;font-weight:600;margin-top:9px;line-height:1.45}
       .preset{padding:8px 10px}.viewport-wrap{height:330px;overflow:auto;background:#1b1d26;border:1px solid #3a3c49;border-radius:10px;padding:10px;display:flex;justify-content:center;align-items:flex-start}
+      .compare-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:start;max-height:470px;overflow:auto;background:#1b1d26;border:1px solid #3a3c49;border-radius:10px;padding:12px}
+      .device-card{min-width:0;padding:8px;background:#121319;border:1px solid #383943;border-radius:10px;overflow:hidden}
+      .device-title{margin-bottom:7px;color:#dddce7;font-size:12px;font-weight:700}
+      .device-window{position:relative;overflow:hidden;background:white;border-radius:4px;box-shadow:0 5px 18px #0006}
+      .device-window iframe{position:absolute;left:0;top:0;transform-origin:top left;border-radius:0}
+      .editor-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+      .editor-stage{max-height:360px;overflow:auto;padding:8px;background:#0d0e12;border:1px solid #393a46;border-radius:10px;text-align:center}
+      .editor-stage canvas{display:block;max-width:100%;height:auto;margin:0 auto;touch-action:none;cursor:crosshair}
+      .check-row{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid #383943;border-radius:8px;background:#191a22;font-size:12px;font-weight:600}
+      .check-row input{accent-color:#a47aff}
       iframe{border:0;background:white;border-radius:3px;transform-origin:top center;box-shadow:0 8px 30px #0007}
       #footer{display:none;flex:none;border-top:1px solid var(--pl-line);padding:9px 15px;align-items:center;gap:8px;color:#b2b5c2;font-size:12px;font-weight:500;line-height:1.4;background:#15161d}
       #panel.expanded #footer{display:flex}
       #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#202635;color:#f5f7fb;border:1px solid #414b60;padding:8px 12px;border-radius:9px;box-shadow:0 6px 24px #0008;display:none;pointer-events:none}
       .welcome{padding-top:2px}.feature{font-size:13px;font-weight:600;line-height:1.45;color:#dedee7;padding:9px 0;border-bottom:1px solid #30313c}.feature:last-child{border:0}
-      @media(max-width:640px){#panel{width:calc(100vw - 16px);bottom:8px;border-radius:16px}#panel.expanded{max-height:calc(100vh - 16px)}header{height:50px;padding:0 12px}nav{padding:8px}.navbtn{width:74px;height:60px;flex-basis:74px;font-size:11px}main{padding:16px 15px 18px;max-height:calc(100vh - 190px)}.kv{grid-template-columns:95px minmax(0,1fr)}}
+      @media(max-width:640px){#panel{width:calc(100vw - 16px);bottom:8px;border-radius:16px}#panel.expanded{max-height:calc(100vh - 16px)}#panel.sidebar{left:8px;right:8px;top:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}#panel.sidebar:not(.expanded){left:auto;right:8px;top:50%;bottom:auto;transform:translateY(-50%);width:72px;height:auto;max-height:calc(100vh - 16px)}header{height:50px;padding:0 12px}nav{padding:8px}.navbtn{width:74px;height:60px;flex-basis:74px;font-size:11px}main{padding:16px 15px 18px;max-height:calc(100vh - 190px)}.kv{grid-template-columns:95px minmax(0,1fr)}#panel.sidebar nav{width:72px;flex-basis:72px;padding:6px 4px}.compare-wrap{grid-template-columns:1fr 1fr;padding:8px;gap:8px}}
     </style>
     <div id="highlight"></div>
     <section id="panel" role="dialog" aria-label="PageLens website toolkit">
-      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="close" title="Back to tools">⌄</button></header>
+      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="settings" title="Workspace settings" aria-label="Workspace settings">⚙</button><button class="subtle" data-action="close" title="Back to tools">⌄</button></header>
       <div id="body"><nav id="nav"></nav><main id="main"></main></div>
       <div id="footer"><span class="grow">Local page tools · Changes are temporary</span><button class="subtle" data-action="undo">Undo</button></div>
     </section>
@@ -97,7 +116,8 @@
   const nav = shadow.getElementById("nav");
   const highlight = shadow.getElementById("highlight");
   const toast = shadow.getElementById("toast");
-  const state = { tool: null, selected: null, picking: false, measuring: false, firstPoint: null, history: [], fontStyle: null, responsiveFrame: null };
+  const defaultPreferences = { dock: "bottom", captureMode: "visible", responsiveWidths: [375, 768, 1280], toolOrder: tools.map((item) => item[0]) };
+  const state = { tool: null, selected: null, picking: false, measuring: false, firstPoint: null, history: [], fontStyle: null, fontLink: null, fontCatalog: null, fontCatalogLoading: false, fontCatalogLoaded: false, responsiveFrames: [], screenshotCanvas: null, originalScreenshot: null, editorMode: "view", pickPurpose: null, preferences: { ...defaultPreferences } };
   const icons = [
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M10 8l6 7-3 .2 1.2 3.3-1.8.7-1.3-3.3-2 2z"/></svg>`,
     `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="1.5"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>`,
@@ -113,6 +133,7 @@
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/></svg>`,
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3 9 6m3-3 3 3M12 21l-3-3m3 3 3-3M3 12l3-3m-3 3 3 3m15-3-3-3m3 3-3 3"/></svg>`
   ];
+  const fontChoices = ["Inter", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins", "Nunito", "Nunito Sans", "Source Sans 3", "Source Serif 4", "Merriweather", "Playfair Display", "DM Sans", "DM Serif Display", "Manrope", "Work Sans", "Fira Sans", "Fira Code", "IBM Plex Sans", "IBM Plex Mono", "Space Grotesk", "Space Mono", "Plus Jakarta Sans", "Outfit", "Sora", "Urbanist", "Rubik", "Karla", "Barlow", "Barlow Condensed", "Oswald", "Archivo", "Archivo Black", "Raleway", "Quicksand", "Mulish", "Cabin", "Libre Franklin", "Libre Baskerville", "Lora", "Cormorant Garamond", "Bodoni Moda", "Fraunces", "Bitter", "Crimson Text", "Alegreya", "Spectral", "PT Sans", "PT Serif", "Ubuntu", "Inconsolata", "JetBrains Mono", "Figtree", "Red Hat Display", "Red Hat Text", "Lexend", "Epilogue", "Josefin Sans", "Kanit", "Titillium Web", "Archivo Narrow", "Noto Sans", "Noto Serif", "Noto Sans Mono", "Google Sans", "Arial", "Georgia", "Verdana", "system-ui", "monospace"];
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -134,8 +155,48 @@
     return `<div class="kv"><div class="key">${esc(key)}</div><div class="value">${esc(value)}</div></div>`;
   }
   function navMarkup() {
-    nav.innerHTML = tools.map((item, i) =>
-      `<button class="navbtn ${state.tool === item[0] ? "active" : ""}" data-tool="${item[0]}" title="${esc(item[1])}" aria-label="${esc(item[1])}"><span class="tool-icon">${icons[i]}</span><span class="tool-label">${esc(item[3] || item[1])}</span></button>`).join("");
+    const ordered = state.preferences.toolOrder.map((id) => tools.find((item) => item[0] === id)).filter(Boolean);
+    tools.filter((item) => !ordered.includes(item)).forEach((item) => ordered.push(item));
+    nav.innerHTML = ordered.map((item) => {
+      const iconIndex = tools.indexOf(item);
+      return `<button class="navbtn ${state.tool === item[0] ? "active" : ""}" data-tool="${item[0]}" title="${esc(item[1])}" aria-label="${esc(item[1])}"><span class="tool-icon">${icons[iconIndex]}</span><span class="tool-label">${esc(item[3] || item[1])}</span></button>`;
+    }).join("");
+    panel.classList.toggle("sidebar", state.preferences.dock === "sidebar");
+  }
+  function savePreferences() {
+    try { chrome.storage?.local?.set({ pagelensPreferences: state.preferences }); } catch (_) {}
+  }
+  async function loadFontCatalog() {
+    if (state.fontCatalogLoaded || state.fontCatalogLoading) return;
+    state.fontCatalogLoading = true;
+    try {
+      const response = await fetch("https://raw.githubusercontent.com/google/fonts/main/tags/all/families.csv", { mode: "cors", credentials: "omit" });
+      if (!response.ok) throw new Error(`Catalog request failed (${response.status})`);
+      const csv = await response.text();
+      state.fontCatalog = [...new Set(csv.split(/\r?\n/).map((line) => line.split(",", 1)[0].trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    } catch (_) {
+      state.fontCatalog = [];
+    } finally {
+      state.fontCatalogLoading = false;
+      state.fontCatalogLoaded = true;
+      if (state.tool === "swap-fonts") render();
+    }
+  }
+  function loadPreferences() {
+    try {
+      chrome.storage?.local?.get({ pagelensPreferences: null }, (result) => {
+        const saved = result?.pagelensPreferences;
+        if (saved && typeof saved === "object") {
+          state.preferences = {
+            ...defaultPreferences,
+            ...saved,
+            responsiveWidths: Array.isArray(saved.responsiveWidths) ? saved.responsiveWidths.filter((width) => [375, 430, 768, 1024, 1280, 1440].includes(Number(width))).map(Number) : defaultPreferences.responsiveWidths,
+            toolOrder: Array.isArray(saved.toolOrder) ? [...new Set(saved.toolOrder.filter((id) => tools.some((item) => item[0] === id))), ...tools.map((item) => item[0]).filter((id) => !saved.toolOrder.includes(id))] : defaultPreferences.toolOrder
+          };
+          render();
+        }
+      });
+    } catch (_) {}
   }
   function currentInfo() {
     const el = state.selected;
@@ -248,7 +309,7 @@
     const d = pageDetails();
     return `Create an original web page inspired by the design characteristics below. Do not reuse the source brand, wording, imagery, or proprietary assets.\n\nPage context: ${d.title}\nDescription: ${d.description || "Not provided"}\nViewport reviewed: ${d.viewport}\n\nVisual direction\n- Main colors: ${d.colors.slice(0, 8).map((c) => c.color).join(", ") || "not detected"}\n- Typography: ${d.fonts.slice(0, 8).map((f) => `${f.fontFamily} ${f.fontSize} / ${f.fontWeight}`).join("; ") || "not detected"}\n- Content structure: ${d.headings.join(" → ") || "inspect the page sample"}\n\nBuild an accessible, responsive implementation with clear spacing, reusable components, and original copy and visual assets. Use the extracted details as a starting point and make your own design decisions.`;
   }
-  function makeStaticClone() {
+  async function makeStaticClone(includeAssets = true) {
     const clone = document.documentElement.cloneNode(true);
     const sourceNodes = [document.documentElement, ...document.documentElement.querySelectorAll("*")];
     const cloneNodes = [clone, ...clone.querySelectorAll("*")];
@@ -282,17 +343,80 @@
     stylesheet.rel = "stylesheet";
     stylesheet.href = "styles.css";
     clone.querySelector("head")?.appendChild(stylesheet);
-    const html = `<!doctype html>\n${clone.outerHTML}`;
-    const styles = collectPageStyles();
-    const assets = scanAssets().filter((item) => !item.url.startsWith("data:")).slice(0, 150).map(({ type, alt, url }) => ({ type, alt, url }));
+    let html = `<!doctype html>\n${clone.outerHTML}`;
+    let styles = collectPageStyles();
+    const foundAssets = scanAssets().filter((item) => /^https?:/i.test(item.url)).slice(0, 150);
+    const packaged = [];
+    const assetPaths = new Map();
+    let assetBytes = 0;
+    if (includeAssets) {
+      setStatus("Finding assets the page allows PageLens to save…");
+      for (let index = 0; index < Math.min(foundAssets.length, 45); index++) {
+        const item = foundAssets[index];
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 7000);
+          const response = await fetch(item.url, { mode: "cors", credentials: "omit", signal: controller.signal });
+          clearTimeout(timeout);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const type = (response.headers.get("content-type") || "").split(";")[0].toLowerCase();
+          if (type && !/^(image\/|font\/|audio\/|video\/|application\/font|application\/vnd\.ms-fontobject|application\/octet-stream)/.test(type)) throw new Error("Not an image, font, or media file");
+          const contentLength = Number(response.headers.get("content-length") || 0);
+          if (contentLength > 1500000 || assetBytes + contentLength > 8000000) throw new Error("Asset exceeds the ZIP size limit");
+          const reader = response.body?.getReader();
+          const chunks = []; let byteCount = 0;
+          if (reader) {
+            while (true) {
+              const part = await reader.read();
+              if (part.done) break;
+              byteCount += part.value.length;
+              if (byteCount > 1500000 || assetBytes + byteCount > 8000000) { await reader.cancel(); throw new Error("Asset exceeds the ZIP size limit"); }
+              chunks.push(part.value);
+            }
+          } else {
+            const part = new Uint8Array(await response.arrayBuffer()); byteCount = part.length; chunks.push(part);
+          }
+          if (!byteCount || byteCount > 1500000 || assetBytes + byteCount > 8000000) throw new Error("Asset exceeds the ZIP size limit");
+          const bytes = new Uint8Array(byteCount); let byteOffset = 0;
+          for (const chunk of chunks) { bytes.set(chunk, byteOffset); byteOffset += chunk.length; }
+          const pathName = (() => { try { return decodeURIComponent(new URL(item.url).pathname.split("/").pop() || "asset"); } catch (_) { return "asset"; } })();
+          let ext = pathName.match(/\.[a-z0-9]{1,8}$/i)?.[0] || "";
+          if (!/^(?:\.png|\.jpe?g|\.gif|\.webp|\.avif|\.svg|\.ico|\.woff2?|\.ttf|\.otf|\.eot|\.mp3|\.mp4|\.webm|\.ogg)$/i.test(ext)) ext = "";
+          if (!ext) ext = ({ "image/jpeg": ".jpg", "image/svg+xml": ".svg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif", "image/avif": ".avif", "font/woff2": ".woff2", "font/woff": ".woff", "font/ttf": ".ttf", "audio/mpeg": ".mp3", "video/mp4": ".mp4" })[type] || ".bin";
+          const packagePath = `assets/${String(index + 1).padStart(3, "0")}-${safeFilename(pathName.replace(/\.[^.]*$/, "") || item.type.toLowerCase())}${ext}`;
+          assetPaths.set(item.url, packagePath);
+          packaged.push({ name: packagePath, bytes });
+          assetBytes += bytes.length;
+        } catch (_) {
+          // CORS, unavailable files, or ZIP limits leave this asset linked to its original URL.
+        }
+      }
+    }
+    if (assetPaths.size) {
+      for (const el of clone.querySelectorAll("[src],[href],[poster],[xlink\\:href]")) {
+        for (const name of ["src", "href", "poster", "xlink:href"]) {
+          const value = el.getAttribute(name);
+          if (!value) continue;
+          const localPath = assetPaths.get(value);
+          if (localPath) el.setAttribute(name, localPath);
+        }
+      }
+      for (const [url, packagePath] of assetPaths) {
+        html = html.replaceAll(url.replaceAll("&", "&amp;"), packagePath).replaceAll(url, packagePath);
+        styles = styles.replaceAll(url, packagePath);
+      }
+    }
+    const assets = foundAssets.map(({ type, alt, url }) => ({ type, alt, url, included: assetPaths.has(url), ...(assetPaths.has(url) ? { packagePath: assetPaths.get(url) } : {}) }));
     const readme = `# ${document.title || "PageLens UI snapshot"}\n\nThis ZIP contains a local snapshot of the rendered page UI.\n\n- Open index.html in a browser to view the snapshot.\n- styles.css contains readable page rules that the browser allowed PageLens to collect. Key computed styles are also saved inline in the HTML.\n- assets.json lists referenced images and media. Those assets remain hosted at their original URLs and may need an internet connection.\n\nThis is a rendered UI snapshot, not the website's original source project. Scripts and embedded frames are removed for safety, so app behavior, server code, and backend features are not included.\n\nSource page: ${location.href}\nCaptured viewport: ${innerWidth} × ${innerHeight}\n`;
     const zip = makeZip([
       { name: "index.html", content: html },
       { name: "styles.css", content: styles || "/* PageLens saved the available computed styles inline in index.html. */\n" },
       { name: "assets.json", content: JSON.stringify(assets, null, 2) },
-      { name: "README.md", content: readme }
+      { name: "README.md", content: readme.replace("Those assets remain hosted at their original URLs and may need an internet connection.", `${assetPaths.size} assets were copied into the assets/ folder when the source site allowed it; remaining assets stay linked to their original URLs and may need an internet connection.`) },
+      ...packaged
     ]);
     downloadBlob(zip, `${safeFilename(document.title || "page")}-ui.zip`);
+    setStatus(`ZIP ready · ${assetPaths.size} of ${foundAssets.length} assets included.`);
   }
   function collectPageStyles() {
     const chunks = [];
@@ -353,7 +477,7 @@
     let offset = 0;
     for (const file of files) {
       const name = encoder.encode(file.name);
-      const data = encoder.encode(file.content);
+      const data = file.bytes instanceof Uint8Array ? file.bytes : encoder.encode(file.content || "");
       const crc = crc32(data);
       const local = join([u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), name, data]);
       const central = join([u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), name]);
@@ -396,6 +520,155 @@
   function assetsList(items) {
     return items.map((item, i) => `<div class="asset row">${item.preview ? `<img src="${esc(item.preview)}" alt="">` : `<span class="chip">${esc(item.type.slice(0,1))}</span>`}<div class="grow"><b>${esc(item.type)}</b><div class="muted">${esc(item.alt || item.url).slice(0, 96)}</div></div><button data-action="download-asset" data-index="${i}">Save</button></div>`).join("") || `<div class="hint">No assets found.</div>`;
   }
+  function copyCanvas(source) {
+    const canvas = document.createElement("canvas");
+    canvas.width = source.width; canvas.height = source.height;
+    canvas.getContext("2d").drawImage(source, 0, 0);
+    return canvas;
+  }
+  function canvasFromDataUrl(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => { const canvas = document.createElement("canvas"); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight; canvas.getContext("2d").drawImage(image, 0, 0); resolve(canvas); };
+      image.onerror = () => reject(new Error("The screenshot image could not be opened."));
+      image.src = dataUrl;
+    });
+  }
+  function captureFrame() {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ type: "pagelens:capture-frame" }, (response) => {
+        if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
+        if (!response?.ok || !response.dataUrl) return reject(new Error(response?.error || "Screenshot capture failed."));
+        resolve(response.dataUrl);
+      });
+    });
+  }
+  async function captureScreenshot(mode) {
+    if (mode === "element" && !state.selected?.isConnected) {
+      state.pickPurpose = "screenshot-element";
+      activatePick();
+      setStatus("Click the page element to capture it.");
+      return;
+    }
+    const oldX = scrollX, oldY = scrollY;
+    const target = mode === "element" ? state.selected : null;
+    try {
+      setStatus(mode === "full" ? "Capturing and stitching page frames…" : "Capturing page…");
+      if (target) target.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+      host.style.visibility = "hidden";
+      let canvas;
+      if (mode === "full") {
+        const pageHeight = Math.min(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight), Math.floor(12000 / Math.max(1, devicePixelRatio)));
+        const viewportHeight = Math.max(1, innerHeight);
+        const yPositions = [];
+        for (let y = 0; y < pageHeight; y += viewportHeight) yPositions.push(y);
+        for (let index = 0; index < yPositions.length; index++) {
+          const y = yPositions[index];
+          window.scrollTo(0, y);
+          await new Promise((resolve) => setTimeout(resolve, 110));
+          const frame = await canvasFromDataUrl(await captureFrame());
+          const scale = frame.height / viewportHeight;
+          if (!canvas) { canvas = document.createElement("canvas"); canvas.width = frame.width; canvas.height = Math.max(1, Math.ceil(pageHeight * scale)); }
+          const cropHeight = Math.min(frame.height, Math.ceil((pageHeight - y) * scale));
+          canvas.getContext("2d").drawImage(frame, 0, 0, frame.width, cropHeight, 0, Math.round(y * scale), frame.width, cropHeight);
+        }
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 110));
+        const frame = await canvasFromDataUrl(await captureFrame());
+        if (target) {
+          const rect = target.getBoundingClientRect();
+          const scaleX = frame.width / innerWidth, scaleY = frame.height / innerHeight;
+          const x = Math.max(0, Math.floor(rect.left * scaleX)), y = Math.max(0, Math.floor(rect.top * scaleY));
+          const width = Math.min(frame.width - x, Math.ceil(rect.width * scaleX)), height = Math.min(frame.height - y, Math.ceil(rect.height * scaleY));
+          if (width < 1 || height < 1) throw new Error("The selected element is outside the screenshot area.");
+          canvas = document.createElement("canvas"); canvas.width = width; canvas.height = height;
+          canvas.getContext("2d").drawImage(frame, x, y, width, height, 0, 0, width, height);
+        } else canvas = frame;
+      }
+      state.screenshotCanvas = canvas;
+      state.originalScreenshot = copyCanvas(canvas);
+      state.editorMode = mode === "area" ? "crop" : "view";
+      state.tool = "screenshot";
+      render();
+      setStatus(`${mode === "full" ? "Full page" : mode === "element" ? "Element" : mode === "area" ? "Area" : "Visible area"} captured · ${canvas.width} × ${canvas.height} px.`);
+    } catch (error) {
+      setStatus(error.message || "Screenshot failed. Try a normal website tab.");
+    } finally {
+      host.style.visibility = "visible";
+      window.scrollTo(oldX, oldY);
+    }
+  }
+  function editorPoint(event) {
+    const rect = state.screenshotCanvas.getBoundingClientRect();
+    return { x: Math.max(0, Math.min(state.screenshotCanvas.width, (event.clientX - rect.left) * state.screenshotCanvas.width / rect.width)), y: Math.max(0, Math.min(state.screenshotCanvas.height, (event.clientY - rect.top) * state.screenshotCanvas.height / rect.height)) };
+  }
+  function editorPointerDown(event) {
+    if (state.editorMode === "view") return;
+    event.preventDefault();
+    const point = editorPoint(event);
+    state.editorInteraction = { start: point, last: point, snapshot: copyCanvas(state.screenshotCanvas) };
+    state.screenshotCanvas.setPointerCapture?.(event.pointerId);
+    if (state.editorMode === "draw") {
+      const ctx = state.screenshotCanvas.getContext("2d");
+      ctx.beginPath(); ctx.moveTo(point.x, point.y); ctx.strokeStyle = "#ff4d8d"; ctx.lineWidth = Math.max(3, state.screenshotCanvas.width / 500); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    }
+  }
+  function editorPointerMove(event) {
+    if (!state.editorInteraction) return;
+    const point = editorPoint(event);
+    if (state.editorMode === "draw") {
+      const ctx = state.screenshotCanvas.getContext("2d"); ctx.lineTo(point.x, point.y); ctx.stroke(); state.editorInteraction.last = point;
+    } else if (state.editorMode === "crop") {
+      const canvas = state.screenshotCanvas, ctx = canvas.getContext("2d"), start = state.editorInteraction.start;
+      ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(state.editorInteraction.snapshot, 0, 0);
+      ctx.save(); ctx.strokeStyle = "#bb8cff"; ctx.lineWidth = Math.max(2, canvas.width / 700); ctx.setLineDash([10, 7]); ctx.strokeRect(start.x, start.y, point.x - start.x, point.y - start.y); ctx.restore();
+      state.editorInteraction.last = point;
+    }
+  }
+  function editorPointerUp(event) {
+    const interaction = state.editorInteraction;
+    if (!interaction) return;
+    if (state.editorMode === "crop") {
+      const end = editorPoint(event), left = Math.max(0, Math.floor(Math.min(interaction.start.x, end.x))), top = Math.max(0, Math.floor(Math.min(interaction.start.y, end.y)));
+      const width = Math.floor(Math.abs(end.x - interaction.start.x)), height = Math.floor(Math.abs(end.y - interaction.start.y));
+      if (width > 8 && height > 8) {
+        const cropped = document.createElement("canvas"); cropped.width = width; cropped.height = height;
+        cropped.getContext("2d").drawImage(interaction.snapshot, left, top, width, height, 0, 0, width, height);
+        state.screenshotCanvas = cropped; state.editorMode = "view"; render();
+      } else {
+        state.screenshotCanvas.getContext("2d").clearRect(0, 0, state.screenshotCanvas.width, state.screenshotCanvas.height);
+        state.screenshotCanvas.getContext("2d").drawImage(interaction.snapshot, 0, 0);
+      }
+    }
+    state.editorInteraction = null;
+  }
+  async function exportEditorPdf() {
+    const canvas = state.screenshotCanvas;
+    const data = atob(canvas.toDataURL("image/jpeg", 0.94).split(",")[1]);
+    const jpeg = Uint8Array.from(data, (ch) => ch.charCodeAt(0));
+    const pageW = 612, pageH = 792, scale = Math.min(pageW / canvas.width, pageH / canvas.height);
+    const drawW = canvas.width * scale, drawH = canvas.height * scale, left = (pageW - drawW) / 2, bottom = (pageH - drawH) / 2;
+    const encoder = new TextEncoder();
+    const stream = encoder.encode(`q\n${drawW.toFixed(3)} 0 0 ${drawH.toFixed(3)} ${left.toFixed(3)} ${bottom.toFixed(3)} cm\n/Im0 Do\nQ\n`);
+    const objects = [
+      encoder.encode("<< /Type /Catalog /Pages 2 0 R >>"),
+      encoder.encode("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"),
+      encoder.encode(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`),
+      [encoder.encode(`<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`), jpeg, encoder.encode("\nendstream")],
+      [encoder.encode(`<< /Length ${stream.length} >>\nstream\n`), stream, encoder.encode("endstream")]
+    ];
+    const pieces = [encoder.encode("%PDF-1.4\n")], offsets = [0]; let byteLength = pieces[0].length;
+    objects.forEach((obj, index) => {
+      offsets.push(byteLength); const prefix = encoder.encode(`${index + 1} 0 obj\n`), suffix = encoder.encode("\nendobj\n");
+      pieces.push(prefix); byteLength += prefix.length;
+      const parts = Array.isArray(obj) ? obj : [obj]; for (const part of parts) { pieces.push(part); byteLength += part.length; }
+      pieces.push(suffix); byteLength += suffix.length;
+    });
+    const xrefOffset = byteLength;
+    const xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+    pieces.push(encoder.encode(xref));
+    downloadBlob(new Blob(pieces, { type: "application/pdf" }), `${safeFilename(document.title || "pagelens-capture")}.pdf`);
+  }
   function render() {
     navMarkup();
     panel.classList.toggle("expanded", Boolean(state.tool));
@@ -405,42 +678,76 @@
     const pages = {
       home: `<div class="welcome"><h1>See the details behind a page.</h1><p>Choose a tool, then work with the page open behind this panel.</p><div class="card"><h2>Quick start</h2><div class="feature">1. Pick an element to inspect its structure and styles.</div><div class="feature">2. Collect colors, type, and assets as references.</div><div class="feature">3. Try local edits or capture the visible page.</div></div><div class="hint">PageLens reads the page currently open in this tab. Edits are temporary and disappear when you reload.</div><h2>Selected element</h2>${selected || `<div class="muted">Nothing selected yet.</div>`}</div>`,
       pick: `<h1>Pick element</h1><p>Select a component to inspect its markup and computed style.</p>${button("Pick on page", "pick", true)}${selected || ""}${info ? `<h2>HTML</h2><textarea class="code" readonly>${esc(info.el.outerHTML.slice(0, 12000))}</textarea><div class="row">${button("Copy HTML", "copy-html")}${button("Copy CSS", "copy-css")}</div><h2>Computed styles</h2><textarea class="code" readonly>${esc(computedFor(info.el))}</textarea>` : ""}<div class="status"></div>`,
-      clone: `<h1>Clone page</h1><p>Package the page’s visible UI into a ZIP with an HTML snapshot, saved CSS, and an asset reference list.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("ZIP contents", "index.html · styles.css · assets.json · README.md")}</div><div class="hint">This is a rendered UI snapshot, not the original source project. Scripts and embedded frames are removed; app behavior and backend code are not included.</div><div style="margin-top:12px">${button("Download UI ZIP", "clone", true)}</div><div class="status"></div>`,
+      clone: `<h1>Clone page</h1><p>Package the page’s visible UI into a ZIP with an HTML snapshot, saved CSS, and any assets the page allows PageLens to fetch.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("ZIP contents", "index.html · styles.css · assets/ · assets.json · README.md")}</div><label class="check-row"><input id="clone-include-assets" type="checkbox" checked> Include accessible images, fonts, and media</label><div class="hint" style="margin-top:10px">Cross site asset servers may block downloads. Blocked files stay linked to their original URL. Scripts and embedded frames are removed; this is not the original source project or working app.</div><div style="margin-top:12px">${button("Download UI ZIP", "clone", true)}</div><div class="status"></div>`,
       "design-md": `<h1>Design MD</h1><p>Build a Markdown reference with extracted colors, type styles, headings, and page context.</p><div class="card">${kv("Page", document.title)}${kv("URL", location.href)}${kv("Viewport", `${innerWidth} × ${innerHeight}`)}${kv("Palette", `${scanColors().length} colors sampled`)}${kv("Text styles", `${scanFonts().length} styles sampled`)}</div><div class="row">${button("Download Design MD", "design-md", true)}${button("Copy Markdown", "copy-md")}</div><div class="status"></div>`,
       prompt: `<h1>Design prompt</h1><p>Turn the observed design details into an original implementation brief.</p><textarea id="prompt-text">${esc(designPrompt())}</textarea><div class="row">${button("Copy prompt", "copy-prompt", true)}${button("Download .txt", "download-prompt")}</div><div class="status"></div>`,
       assets: `<h1>Extract assets</h1><p>Images, SVGs, media, and CSS background images found on this page.</p><div class="row">${button("Rescan assets", "refresh-assets")}</div><div id="assets-list" class="stack">${assetsList(scanAssets())}</div><div class="status"></div>`,
       colors: `<h1>Extract colors</h1><p>Frequent text, surface, and border colors. Select a swatch to copy it.</p><div class="row">${button("Copy CSS variables", "copy-palette", true)}${button("Export JSON", "export-palette")}</div><div class="card" id="color-list">${colorList(scanColors())}</div><div class="status"></div>`,
       fonts: `<h1>Detect fonts</h1><p>Text styles found in visible page content, ordered by frequency.</p><div class="card">${fontList(scanFonts())}</div><div class="status"></div>`,
-      "swap-fonts": `<h1>Swap fonts</h1><p>Preview a typeface across the page. The change stays local and resets on reload.</p><div class="card">${kv("Current page fonts", [...new Set(scanFonts().map((f) => f.fontFamily))].slice(0, 5).join(" · ") || "None found")}</div><label class="muted" for="font-choice">Preview font family</label><select id="font-choice"><option value="Arial, sans-serif">Arial</option><option value="Georgia, serif">Georgia</option><option value="Verdana, sans-serif">Verdana</option><option value="system-ui, sans-serif">System UI</option><option value="monospace">Monospace</option><option value="'Courier New', monospace">Courier New</option></select><div class="row" style="margin-top:9px">${button("Apply preview", "apply-font", true)}${button("Reset font", "reset-font")}</div><div class="status"></div>`,
+      "swap-fonts": `<h1>Swap fonts</h1><p>Search the Google Fonts family list or type a family name. Choose which page text to update.</p><div class="card">${kv("Current page fonts", [...new Set(scanFonts().map((f) => f.fontFamily))].slice(0, 5).join(" · ") || "None found")}</div><label class="muted" for="font-choice">Preview font family</label><input id="font-choice" type="text" list="font-options" value="Inter" placeholder="Search fonts, e.g. Space Grotesk"><datalist id="font-options">${[...new Set([...fontChoices, ...(state.fontCatalog || [])])].map((name) => `<option value="${esc(name)}"></option>`).join("")}</datalist><div class="muted" style="margin:5px 0 10px">${state.fontCatalogLoading ? "Loading the full Google Fonts family list…" : state.fontCatalog?.length ? `${state.fontCatalog.length.toLocaleString()} families available` : "Popular families are listed; you can also type a family name."}</div><label class="muted" for="font-scope" style="display:block;margin-top:10px">Apply to</label><select id="font-scope"><option value="all">Whole page</option><option value="headings">Headings</option><option value="body">Body text</option><option value="selected">Selected element</option></select><div class="row" style="margin-top:9px">${button("Apply preview", "apply-font", true)}${button("Reset font", "reset-font")}</div><div class="hint" style="margin-top:10px">The font preview is temporary. Applying a Google font sends the selected family name to Google Fonts.</div><div class="status"></div>`,
       inspect: `<h1>Inspect & measure</h1><p>Pick an element to read its box size, spacing, and computed styles.</p>${button("Pick element", "pick", true)}${selected || ""}${info ? `<div class="card">${kv("Position", `${Math.round(info.rect.left)}, ${Math.round(info.rect.top)} px`)}${kv("Margin", info.style.margin)}${kv("Padding", info.style.padding)}${kv("Border", info.style.border)}${kv("Display", info.style.display)}${kv("Positioning", info.style.position)}</div>` : ""}<h2>Measure distance</h2><p>Click two points in the page to calculate the straight-line distance.</p>${button("Start measuring", "measure")}${state.firstPoint ? `<div class="hint" style="margin-top:8px">First point: ${Math.round(state.firstPoint.x)}, ${Math.round(state.firstPoint.y)} px</div>` : ""}<div class="status"></div>`,
       "edit-text": `<h1>Edit text</h1><p>Select a text element and try a copy change in place.</p>${button("Pick text", "pick", true)}${selected || ""}${info ? `<h2>Preview copy</h2><textarea id="edit-value">${esc(info.el.innerText || "")}</textarea><div class="row">${button("Apply to page", "apply-text", true)}${button("Undo edit", "undo")}</div>` : ""}<div class="hint" style="margin-top:12px">This edits the current rendered page only. Reload the tab to restore the original text.</div><div class="status"></div>`,
-      screenshot: `<h1>Screenshot</h1><p>Save a PNG of the visible browser area, with this panel hidden during capture.</p><div class="card">${kv("Capture size", `${innerWidth} × ${innerHeight} px`)}${kv("Page", location.hostname)}</div>${button("Capture visible area", "screenshot", true)}<div class="hint" style="margin-top:10px">For a longer page, scroll to the section you want and capture it in separate frames.</div><div class="status"></div>`,
-      responsive: `<h1>Responsive viewer</h1><p>Open the current page in a framed preview at a common viewport width.</p><div class="row"><select id="responsive-size"><option value="375">Phone · 375 px</option><option value="430">Large phone · 430 px</option><option value="768">Tablet · 768 px</option><option value="1024">Laptop · 1024 px</option><option value="1280">Desktop · 1280 px</option></select>${button("Load", "load-responsive", true)}</div><div class="viewport-wrap" style="margin-top:10px"><div id="responsive-slot" class="muted">Choose a viewport and load a preview.</div></div><div class="hint" style="margin-top:10px">Some websites block embedded previews. The viewer uses your browser’s normal rendering engine.</div><div class="status"></div>`,
+      screenshot: `<h1>Screenshot</h1><p>Capture the visible area or stitch a long page, then crop, annotate, and export the result.</p><div class="card">${kv("Viewport", `${innerWidth} × ${innerHeight} px`)}${kv("Page", location.hostname)}</div><div class="row">${button("Capture visible", "capture-visible", state.preferences.captureMode === "visible")}${button("Capture full page", "capture-full", state.preferences.captureMode === "full")}${button("Capture area", "capture-area")}${button("Capture element", "capture-element")}</div>${state.screenshotCanvas ? `<div class="editor-tools">${button("Crop", "editor-crop", state.editorMode === "crop")}${button("Draw", "editor-draw", state.editorMode === "draw")}${button("View", "editor-view", state.editorMode === "view")}${button("Reset", "editor-reset")}${button("Download PNG", "editor-png", true)}${button("Download PDF", "editor-pdf")}</div><div id="editor-stage" class="editor-stage"></div><div class="muted" style="margin-top:7px">Drag to draw. Crop mode keeps the selected rectangle. PNG and PDF exports use the current edited image.</div>` : `<div class="hint" style="margin-top:10px">Full page capture scrolls and combines browser frames. Capture height is limited to keep large images manageable; sticky page elements may repeat.</div>`}<div class="status"></div>`,
+      responsive: `<h1>Responsive viewer</h1><p>Compare the same page at several phone, tablet, laptop, and desktop widths.</p><div class="row">${[375, 430, 768, 1024, 1280, 1440].map((width) => `<label class="check-row"><input type="checkbox" data-responsive-width value="${width}" ${state.preferences.responsiveWidths.includes(width) ? "checked" : ""}>${width}px</label>`).join("")}</div><div class="row" style="margin-top:9px">${button("Compare selected sizes", "compare-responsive", true)}${button("Use saved sizes", "use-responsive-sizes")}</div><div id="responsive-grid" class="compare-wrap" style="margin-top:10px">${state.responsiveFrames.length ? "" : `<div class="muted">Select viewport sizes and compare them.</div>`}</div><div class="hint" style="margin-top:10px">A site may block previews in frames. This uses the browser’s normal rendering and does not bypass a site’s frame restrictions.</div><div class="status"></div>`,
+      settings: `<h1>Workspace settings</h1><p>Choose where PageLens sits, set capture defaults, and arrange the toolbar.</p><div class="card"><label class="muted" for="dock-choice">Toolbar position</label><select id="dock-choice"><option value="bottom" ${state.preferences.dock === "bottom" ? "selected" : ""}>Bottom dock</option><option value="sidebar" ${state.preferences.dock === "sidebar" ? "selected" : ""}>Right sidebar</option></select><label class="muted" for="capture-default" style="display:block;margin-top:10px">Default screenshot mode</label><select id="capture-default"><option value="visible" ${state.preferences.captureMode === "visible" ? "selected" : ""}>Visible area</option><option value="full" ${state.preferences.captureMode === "full" ? "selected" : ""}>Full page</option></select><h2>Toolbar order</h2><div class="stack">${state.preferences.toolOrder.map((id, index) => { const item = tools.find((tool) => tool[0] === id); return `<div class="row card" style="margin:0;padding:8px 10px"><span class="grow">${esc(item?.[1] || id)}</span><button data-action="move-tool" data-index="${index}" data-direction="up" ${index === 0 ? "disabled" : ""} aria-label="Move up">↑</button><button data-action="move-tool" data-index="${index}" data-direction="down" ${index === state.preferences.toolOrder.length - 1 ? "disabled" : ""} aria-label="Move down">↓</button></div>`; }).join("")}</div><div class="status">Settings save automatically on this browser.</div></div>`,
       layout: `<h1>Move & delete</h1><p>Select an element, then move it before or after a sibling or remove it.</p>${button("Pick element", "pick", true)}${selected || ""}${info ? `<div class="stack" style="margin-top:9px">${button("Move earlier", "move-up")}${button("Move later", "move-down")}${button("Remove element", "remove", false, "danger")}</div>` : ""}<div class="hint" style="margin-top:12px">Changes affect this tab only. Use Undo below or reload the page to restore its original layout.</div><div class="status"></div>`
     };
     main.innerHTML = pages[state.tool] || "";
-    if (state.tool === "responsive" && state.responsiveFrame) {
-      const slot = main.querySelector("#responsive-slot");
-      if (slot) slot.replaceWith(state.responsiveFrame);
+    if (state.tool === "responsive" && state.responsiveFrames.length) {
+      const grid = main.querySelector("#responsive-grid");
+      if (grid) grid.replaceChildren(...state.responsiveFrames);
     }
+    if (state.tool === "screenshot" && state.screenshotCanvas) {
+      const stage = main.querySelector("#editor-stage");
+      if (stage) {
+        stage.appendChild(state.screenshotCanvas);
+        state.screenshotCanvas.style.width = `${Math.min(state.screenshotCanvas.width, Math.max(220, main.clientWidth - 52))}px`;
+        if (!state.screenshotCanvas.dataset.bound) {
+          state.screenshotCanvas.dataset.bound = "true";
+          state.screenshotCanvas.addEventListener("pointerdown", editorPointerDown);
+          state.screenshotCanvas.addEventListener("pointermove", editorPointerMove);
+          state.screenshotCanvas.addEventListener("pointerup", editorPointerUp);
+          state.screenshotCanvas.addEventListener("pointercancel", editorPointerUp);
+        }
+      }
+    }
+    if (state.tool === "swap-fonts") loadFontCatalog();
   }
 
   nav.addEventListener("click", (event) => {
     const button = event.target.closest("[data-tool]");
     if (!button) return;
     state.tool = state.tool === button.dataset.tool ? null : button.dataset.tool;
-    state.responsiveFrame = null;
     render();
+  });
+  shadow.addEventListener("change", (event) => {
+    const target = event.target;
+    if (target.id === "dock-choice") state.preferences.dock = target.value;
+    if (target.id === "capture-default") state.preferences.captureMode = target.value;
+    if (target.matches("[data-responsive-width]")) {
+      const checked = [...main.querySelectorAll("[data-responsive-width]:checked")].map((input) => Number(input.value));
+      state.preferences.responsiveWidths = checked.length ? checked : state.preferences.responsiveWidths;
+    }
+    savePreferences();
+    if (target.id === "dock-choice" || target.id === "capture-default") render();
   });
   shadow.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-action]");
     if (!button) return;
     const action = button.dataset.action;
-    if (action === "close") { state.tool = null; state.responsiveFrame = null; finishPick(); render(); return; }
+    if (action === "close") { state.tool = null; finishPick(); render(); return; }
+    if (action === "settings") { state.tool = "settings"; render(); return; }
+    if (action === "move-tool") {
+      const from = Number(button.dataset.index), to = from + (button.dataset.direction === "up" ? -1 : 1);
+      if (to >= 0 && to < state.preferences.toolOrder.length) {
+        const order = [...state.preferences.toolOrder]; [order[from], order[to]] = [order[to], order[from]]; state.preferences.toolOrder = order; savePreferences(); render();
+      }
+      return;
+    }
     if (action === "undo") return undo();
     if (action === "pick") return activatePick();
     if (action === "measure") return activatePick(true);
-    if (action === "clone") { makeStaticClone(); notify("Page UI ZIP downloaded."); return; }
+    if (action === "clone") { setStatus("Building the page snapshot ZIP…"); await makeStaticClone(main.querySelector("#clone-include-assets")?.checked !== false); notify("Page UI ZIP downloaded."); return; }
     if (action === "design-md") { downloadText(detailsMarkdown(), `${safeFilename(document.title)}-design.md`, "text/markdown"); notify("Design MD downloaded."); return; }
     if (action === "copy-md") return copy(detailsMarkdown());
     if (action === "copy-prompt") return copy(main.querySelector("#prompt-text")?.value || designPrompt());
@@ -459,14 +766,29 @@
       return;
     }
     if (action === "apply-font") {
-      const value = main.querySelector("#font-choice")?.value || "Arial, sans-serif";
+      const family = (main.querySelector("#font-choice")?.value || "Arial").trim();
+      if (!/^[a-zA-Z0-9 \u00C0-\u024f'-]{1,80}$/.test(family)) { setStatus("Enter a font family name using letters, numbers, spaces, or hyphens."); return; }
+      const scope = main.querySelector("#font-scope")?.value || "all";
+      if (scope === "selected" && !state.selected?.isConnected) { setStatus("Pick an element first, or choose another scope."); return; }
       if (!state.fontStyle) { state.fontStyle = document.createElement("style"); state.fontStyle.id = "pagelens-font-preview"; document.documentElement.appendChild(state.fontStyle); }
       const old = state.fontStyle.textContent;
-      state.fontStyle.textContent = `body *:not(#pagelens-extension-root *):not(#pagelens-extension-root){font-family:${value} !important}`;
+      const priorTarget = state.fontTargetEl;
+      if (priorTarget && priorTarget.isConnected) priorTarget.removeAttribute("data-pagelens-font-target");
+      let selector = "body *:not(#pagelens-extension-root *):not(#pagelens-extension-root)";
+      if (scope === "headings") selector = "body h1,body h2,body h3,body h4,body h5,body h6";
+      if (scope === "body") selector = "body p,body li,body blockquote,body dd,body dt,body figcaption,body label";
+      if (scope === "selected") { state.selected.setAttribute("data-pagelens-font-target", "selected"); state.fontTargetEl = state.selected; selector = '[data-pagelens-font-target="selected"]'; }
+      else state.fontTargetEl = null;
+      const fallback = /^(Arial|Georgia|Verdana|system-ui|monospace)$/i.test(family) ? "" : ", sans-serif";
+      state.fontStyle.textContent = `${selector}{font-family:"${family}"${fallback} !important}`;
+      if (!/^(Arial|Georgia|Verdana|system-ui|monospace)$/i.test(family)) {
+        if (!state.fontLink) { state.fontLink = document.createElement("link"); state.fontLink.id = "pagelens-google-font"; state.fontLink.rel = "stylesheet"; document.head.appendChild(state.fontLink); }
+        state.fontLink.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replaceAll("%20", "+")}:wght@400;500;600;700&display=swap`;
+      }
       addUndo(() => { state.fontStyle.textContent = old; });
-      notify("Font preview applied."); return;
+      notify(`Font preview applied to ${scope === "all" ? "the page" : scope}.`); return;
     }
-    if (action === "reset-font") { state.fontStyle?.remove(); state.fontStyle = null; notify("Font preview reset."); return; }
+    if (action === "reset-font") { state.fontStyle?.remove(); state.fontStyle = null; state.fontLink?.remove(); state.fontLink = null; state.fontTargetEl?.removeAttribute("data-pagelens-font-target"); state.fontTargetEl = null; notify("Font preview reset."); return; }
     if (action === "apply-text" && state.selected) {
       const editedElement = state.selected;
       const old = editedElement.innerText;
@@ -475,25 +797,24 @@
       addUndo(() => { if (editedElement.isConnected) editedElement.innerText = old; });
       notify("Text preview updated."); render(); return;
     }
-    if (action === "screenshot") {
-      setStatus("Capturing visible area…");
-      chrome.runtime.sendMessage({ type: "pagelens:capture-visible" }, (response) => {
-        if (chrome.runtime.lastError || !response?.ok) setStatus(response?.error || "Capture failed. Try again on a normal website tab.");
-        else setStatus("PNG capture saved.");
+    if (action === "capture-visible") return captureScreenshot("visible");
+    if (action === "capture-full") return captureScreenshot("full");
+    if (action === "capture-area") return captureScreenshot("area");
+    if (action === "capture-element") return captureScreenshot("element");
+    if (action === "editor-crop" || action === "editor-draw" || action === "editor-view") { state.editorMode = action.replace("editor-", ""); render(); return; }
+    if (action === "editor-reset" && state.originalScreenshot) { state.screenshotCanvas = copyCanvas(state.originalScreenshot); state.editorMode = "view"; render(); return; }
+    if (action === "editor-png" && state.screenshotCanvas) { state.screenshotCanvas.toBlob((blob) => { if (blob) downloadBlob(blob, `${safeFilename(document.title || "pagelens-capture")}.png`); }, "image/png"); return; }
+    if (action === "editor-pdf" && state.screenshotCanvas) { await exportEditorPdf(); return; }
+    if (action === "compare-responsive" || action === "use-responsive-sizes") {
+      const widths = action === "use-responsive-sizes" ? state.preferences.responsiveWidths : [...main.querySelectorAll("[data-responsive-width]:checked")].map((input) => Number(input.value));
+      if (!widths.length) { setStatus("Choose at least one viewport size."); return; }
+      state.preferences.responsiveWidths = widths; savePreferences(); state.responsiveFrames = widths.map((width) => {
+        const card = document.createElement("div"); card.className = "device-card";
+        const scale = Math.min(1, 330 / width), height = 720;
+        card.innerHTML = `<div class="device-title">${width < 500 ? "Phone" : width < 900 ? "Tablet" : width < 1300 ? "Laptop" : "Desktop"} · ${width}px</div><div class="device-window" style="width:${Math.round(width * scale)}px;height:${Math.round(height * scale)}px"><iframe title="${width}px responsive preview" style="width:${width}px;height:${height}px;transform:scale(${scale})" src="${esc(location.href)}"></iframe></div>`;
+        return card;
       });
-      return;
-    }
-    if (action === "load-responsive") {
-      const width = Number(main.querySelector("#responsive-size")?.value || 375);
-      const wrap = main.querySelector(".viewport-wrap");
-      const iframe = document.createElement("iframe");
-      iframe.title = `${width}px responsive preview`;
-      iframe.style.width = `${width}px`; iframe.style.height = "720px"; iframe.style.maxWidth = "none";
-      iframe.src = location.href;
-      const slot = main.querySelector("#responsive-slot");
-      slot.replaceWith(iframe); state.responsiveFrame = iframe;
-      if (width > wrap.clientWidth - 18) iframe.style.transform = `scale(${(wrap.clientWidth - 18) / width})`;
-      notify("Responsive preview loaded when the site allows embedding."); return;
+      render(); notify("Responsive comparison loaded where the site allows framing."); return;
     }
     if ((action === "move-up" || action === "move-down" || action === "remove") && state.selected?.isConnected) {
       const el = state.selected;
@@ -536,9 +857,12 @@
       }
       return;
     }
+    const purpose = state.pickPurpose;
     state.selected = target;
+    state.pickPurpose = null;
     finishPick(); render();
     notify(`Selected ${selectorFor(target) || target.tagName.toLowerCase()}.`);
+    if (purpose === "screenshot-element") captureScreenshot("element");
   }, true);
 
   chrome.runtime.onMessage.addListener((message) => {
@@ -547,4 +871,5 @@
   });
 
   render();
+  loadPreferences();
 })();

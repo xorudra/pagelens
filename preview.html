@@ -122,11 +122,21 @@
   <script>
     // Provide only the Chrome APIs used by PageLens. Browser-only capture is unavailable here.
     window.chrome = window.chrome || {};
+    window.chrome.storage = window.chrome.storage || { local: {
+      get(defaults, callback) {
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem("pagelens-preview-preferences") || "null"); } catch (_) {}
+        callback?.({ ...defaults, ...(saved ? { pagelensPreferences: saved } : {}) });
+      },
+      set(values) {
+        try { if (values.pagelensPreferences) localStorage.setItem("pagelens-preview-preferences", JSON.stringify(values.pagelensPreferences)); } catch (_) {}
+      }
+    } };
     window.chrome.runtime = window.chrome.runtime || {
       lastError: null,
       onMessage: { addListener() {} },
       sendMessage(message, callback) {
-        if (message?.type === "pagelens:capture-visible") {
+        if (message?.type === "pagelens:capture-visible" || message?.type === "pagelens:capture-frame") {
           this.lastError = { message: "Screenshot capture requires the installed extension. All other page tools are available in this preview." };
           callback?.({ ok: false, error: this.lastError.message });
           this.lastError = null;
