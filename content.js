@@ -7,7 +7,7 @@
 
   const tools = [
     ["pick", "Pick element", "Select a page element and copy its HTML or CSS.", "Pick"],
-    ["clone", "Clone page", "Save a static snapshot of the rendered page.", "Clone page"],
+    ["clone", "Clone page", "Download the page UI snapshot as a ZIP.", "Clone page"],
     ["prompt", "Design prompt", "Create a structured brief from this page.", "Prompt"],
     ["design-md", "Design MD", "Collect the page’s colors, type, and layout notes."],
     ["assets", "Extract assets", "Find images, SVGs, videos, and background images.", "Assets"],
@@ -252,7 +252,7 @@
     const clone = document.documentElement.cloneNode(true);
     const sourceNodes = [document.documentElement, ...document.documentElement.querySelectorAll("*")];
     const cloneNodes = [clone, ...clone.querySelectorAll("*")];
-    const cssProps = ["display", "position", "box-sizing", "width", "height", "min-width", "max-width", "margin", "padding", "border", "border-radius", "background", "color", "font-family", "font-size", "font-weight", "line-height", "text-align", "text-decoration", "white-space", "overflow", "object-fit", "flex", "grid-template-columns", "gap", "align-items", "justify-content", "opacity", "box-shadow"];
+    const cssProps = ["display", "position", "box-sizing", "width", "height", "min-width", "max-width", "margin", "padding", "border", "border-radius", "background", "background-size", "background-position", "color", "font-family", "font-size", "font-weight", "line-height", "text-align", "text-decoration", "text-transform", "white-space", "overflow", "object-fit", "flex", "grid-template-columns", "gap", "align-items", "justify-content", "opacity", "box-shadow"];
     sourceNodes.slice(0, 2500).forEach((source, index) => {
       const target = cloneNodes[index];
       if (!target || source === document.documentElement || source === host) return;
@@ -261,23 +261,118 @@
       target.setAttribute("style", `${target.getAttribute("style") || ""};${values}`);
     });
     clone.querySelector("#pagelens-extension-root")?.remove();
-    clone.querySelectorAll("script,iframe,object,embed,noscript").forEach((el) => el.remove());
+    clone.querySelectorAll("script,iframe,object,embed,noscript,base,link,style,meta[http-equiv]").forEach((el) => el.remove());
     clone.querySelectorAll("*").forEach((el) => {
       [...el.attributes].forEach((attr) => {
         if (attr.name.toLowerCase().startsWith("on") || attr.name === "srcdoc") el.removeAttribute(attr.name);
       });
+      ["src", "href", "poster", "xlink:href"].forEach((name) => {
+        const value = el.getAttribute(name);
+        if (!value) return;
+        if (/^(?:javascript|vbscript|file):/i.test(value.trim()) || (name === "href" && /^data:/i.test(value.trim())) || (name !== "href" && /^data:/i.test(value.trim()) && !/^data:image\/(?:png|jpe?g|gif|webp|svg\+xml);/i.test(value.trim()))) { el.removeAttribute(name); return; }
+        if (value.startsWith("#") || /^(?:[a-z]+:|\/\/)/i.test(value)) return;
+        try { el.setAttribute(name, new URL(value, document.baseURI).href); } catch (_) {}
+      });
       if (el.tagName === "INPUT") el.removeAttribute("value");
       if (el.tagName === "TEXTAREA") el.textContent = "";
+      if (el.tagName === "FORM") { el.removeAttribute("action"); el.removeAttribute("method"); }
+      if (el.tagName === "BUTTON" && el.closest("form")) el.type = "button";
     });
-    clone.querySelectorAll("link[rel=stylesheet]").forEach((el) => el.remove());
-    const html = `<!doctype html>\n<!-- Static PageLens snapshot of ${location.href} -->\n${clone.outerHTML}`;
-    downloadText(html, `${safeFilename(document.title || "page")}-snapshot.html`, "text/html");
+    const stylesheet = clone.ownerDocument.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "styles.css";
+    clone.querySelector("head")?.appendChild(stylesheet);
+    const html = `<!doctype html>\n${clone.outerHTML}`;
+    const styles = collectPageStyles();
+    const assets = scanAssets().filter((item) => !item.url.startsWith("data:")).slice(0, 150).map(({ type, alt, url }) => ({ type, alt, url }));
+    const readme = `# ${document.title || "PageLens UI snapshot"}\n\nThis ZIP contains a local snapshot of the rendered page UI.\n\n- Open index.html in a browser to view the snapshot.\n- styles.css contains readable page rules that the browser allowed PageLens to collect. Key computed styles are also saved inline in the HTML.\n- assets.json lists referenced images and media. Those assets remain hosted at their original URLs and may need an internet connection.\n\nThis is a rendered UI snapshot, not the website's original source project. Scripts and embedded frames are removed for safety, so app behavior, server code, and backend features are not included.\n\nSource page: ${location.href}\nCaptured viewport: ${innerWidth} × ${innerHeight}\n`;
+    const zip = makeZip([
+      { name: "index.html", content: html },
+      { name: "styles.css", content: styles || "/* PageLens saved the available computed styles inline in index.html. */\n" },
+      { name: "assets.json", content: JSON.stringify(assets, null, 2) },
+      { name: "README.md", content: readme }
+    ]);
+    downloadBlob(zip, `${safeFilename(document.title || "page")}-ui.zip`);
+  }
+  function collectPageStyles() {
+    const chunks = [];
+    let totalChars = 0;
+    for (const sheet of Array.from(document.styleSheets)) {
+      if (totalChars >= 1000000) break;
+      try {
+        const rules = Array.from(sheet.cssRules || []).slice(0, 3000);
+        const base = sheet.href || document.baseURI;
+        const css = rules.map((rule) => rebaseCssUrls(rule.cssText, base)).join("\n");
+        if (!css.trim()) continue;
+        const source = (sheet.href || "inline stylesheet").replace(/[\r\n*]/g, " ");
+        const chunk = `/* Source: ${source} */\n${css}`.slice(0, 1000000 - totalChars);
+        chunks.push(chunk);
+        totalChars += chunk.length;
+      } catch (_) {
+        // Cross-origin stylesheets can block CSSOM access. The HTML still has computed styles inline.
+      }
+    }
+    return chunks.join("\n\n");
+  }
+  function rebaseCssUrls(css, base) {
+    return css.replace(/url\(\s*(?:(['"])(.*?)\1|([^)]*?))\s*\)/gi, (_match, quote, quoted, unquoted) => {
+      const value = String(quoted ?? unquoted ?? "").trim();
+      if (/^(?:javascript|vbscript|file):/i.test(value)) return "url(\"\")";
+      if (!value || /^(?:data:|blob:|https?:|#)/i.test(value)) return `url("${value}")`;
+      try { return `url("${new URL(value, base).href.replace(/["\\]/g, "\\$&")}")`; }
+      catch (_) { return `url("${value.replace(/["\\]/g, "\\$&")}")`; }
+    });
+  }
+  function makeZip(files) {
+    const encoder = new TextEncoder();
+    const now = new Date();
+    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+    const dosDate = ((Math.max(1980, now.getFullYear()) - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    const u16 = (n) => Uint8Array.of(n & 255, (n >>> 8) & 255);
+    const u32 = (n) => Uint8Array.of(n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255);
+    const join = (parts) => {
+      const size = parts.reduce((sum, part) => sum + part.length, 0);
+      const result = new Uint8Array(size);
+      let offset = 0;
+      for (const part of parts) { result.set(part, offset); offset += part.length; }
+      return result;
+    };
+    const crcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      crcTable[n] = c >>> 0;
+    }
+    const crc32 = (bytes) => {
+      let crc = 0xffffffff;
+      for (const byte of bytes) crc = crcTable[(crc ^ byte) & 255] ^ (crc >>> 8);
+      return (crc ^ 0xffffffff) >>> 0;
+    };
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    for (const file of files) {
+      const name = encoder.encode(file.name);
+      const data = encoder.encode(file.content);
+      const crc = crc32(data);
+      const local = join([u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), name, data]);
+      const central = join([u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), name]);
+      localParts.push(local);
+      centralParts.push(central);
+      offset += local.length;
+    }
+    const central = join(centralParts);
+    const end = join([u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(central.length), u32(offset), u16(0)]);
+    return new Blob([...localParts, central, end], { type: "application/zip" });
   }
   function safeFilename(value) {
     return String(value).normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "pagelens";
   }
   function downloadText(value, filename, type) {
     const blob = new Blob([value], { type: `${type};charset=utf-8` });
+    downloadBlob(blob, filename);
+  }
+  function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = filename; a.style.display = "none";
@@ -310,7 +405,7 @@
     const pages = {
       home: `<div class="welcome"><h1>See the details behind a page.</h1><p>Choose a tool, then work with the page open behind this panel.</p><div class="card"><h2>Quick start</h2><div class="feature">1. Pick an element to inspect its structure and styles.</div><div class="feature">2. Collect colors, type, and assets as references.</div><div class="feature">3. Try local edits or capture the visible page.</div></div><div class="hint">PageLens reads the page currently open in this tab. Edits are temporary and disappear when you reload.</div><h2>Selected element</h2>${selected || `<div class="muted">Nothing selected yet.</div>`}</div>`,
       pick: `<h1>Pick element</h1><p>Select a component to inspect its markup and computed style.</p>${button("Pick on page", "pick", true)}${selected || ""}${info ? `<h2>HTML</h2><textarea class="code" readonly>${esc(info.el.outerHTML.slice(0, 12000))}</textarea><div class="row">${button("Copy HTML", "copy-html")}${button("Copy CSS", "copy-css")}</div><h2>Computed styles</h2><textarea class="code" readonly>${esc(computedFor(info.el))}</textarea>` : ""}<div class="status"></div>`,
-      clone: `<h1>Clone page</h1><p>Export a static HTML snapshot of the rendered page with key computed styles inline.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("Export", "Standalone HTML snapshot with scripts and embedded frames removed")}</div><div class="hint">The export is a visual reference. It does not include the site’s backend, account data, or original project files.</div><div style="margin-top:12px">${button("Download HTML snapshot", "clone", true)}</div><div class="status"></div>`,
+      clone: `<h1>Clone page</h1><p>Package the page’s visible UI into a ZIP with an HTML snapshot, saved CSS, and an asset reference list.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("ZIP contents", "index.html · styles.css · assets.json · README.md")}</div><div class="hint">This is a rendered UI snapshot, not the original source project. Scripts and embedded frames are removed; app behavior and backend code are not included.</div><div style="margin-top:12px">${button("Download UI ZIP", "clone", true)}</div><div class="status"></div>`,
       "design-md": `<h1>Design MD</h1><p>Build a Markdown reference with extracted colors, type styles, headings, and page context.</p><div class="card">${kv("Page", document.title)}${kv("URL", location.href)}${kv("Viewport", `${innerWidth} × ${innerHeight}`)}${kv("Palette", `${scanColors().length} colors sampled`)}${kv("Text styles", `${scanFonts().length} styles sampled`)}</div><div class="row">${button("Download Design MD", "design-md", true)}${button("Copy Markdown", "copy-md")}</div><div class="status"></div>`,
       prompt: `<h1>Design prompt</h1><p>Turn the observed design details into an original implementation brief.</p><textarea id="prompt-text">${esc(designPrompt())}</textarea><div class="row">${button("Copy prompt", "copy-prompt", true)}${button("Download .txt", "download-prompt")}</div><div class="status"></div>`,
       assets: `<h1>Extract assets</h1><p>Images, SVGs, media, and CSS background images found on this page.</p><div class="row">${button("Rescan assets", "refresh-assets")}</div><div id="assets-list" class="stack">${assetsList(scanAssets())}</div><div class="status"></div>`,
@@ -345,7 +440,7 @@
     if (action === "undo") return undo();
     if (action === "pick") return activatePick();
     if (action === "measure") return activatePick(true);
-    if (action === "clone") { makeStaticClone(); notify("Static snapshot downloaded."); return; }
+    if (action === "clone") { makeStaticClone(); notify("Page UI ZIP downloaded."); return; }
     if (action === "design-md") { downloadText(detailsMarkdown(), `${safeFilename(document.title)}-design.md`, "text/markdown"); notify("Design MD downloaded."); return; }
     if (action === "copy-md") return copy(detailsMarkdown());
     if (action === "copy-prompt") return copy(main.querySelector("#prompt-text")?.value || designPrompt());

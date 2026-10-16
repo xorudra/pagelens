@@ -5,7 +5,7 @@ PageLens is a Manifest V3 Chrome extension for inspecting page design and collec
 ## Included tools
 
 - Pick an element and inspect or copy its HTML and computed CSS
-- Export a static HTML snapshot with selected computed styles inline
+- Download a page UI snapshot ZIP with HTML, CSS, and a referenced-assets list
 - Generate a Design MD reference or a design prompt
 - Find images, SVGs, videos, and CSS background assets
 - Extract a page color palette and typography styles
@@ -38,7 +38,7 @@ Screenshot capture still requires the installed extension.
 
 If the page says **Upload package**, choose the ZIP file instead of a folder.
 
-Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. The clone tool creates a static reference and does not reproduce a site's backend or application behavior. Use collected content and assets only when you have permission.
+Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and an asset reference list. It does not include the original project source, scripts, backend, or application behavior; external assets remain at their original URLs. Use collected content and assets only when you have permission.
 
 ## Chrome Web Store listing
 
