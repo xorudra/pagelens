@@ -29,7 +29,7 @@ Screenshot capture requires the installed extension because the browser preview 
 - `activeTab` and `scripting` let PageLens inspect and display tools on the current tab after you click the extension.
 - `downloads` saves exports, screenshots, and assets when you choose to download them.
 - `storage` saves the toolbar position, tool order, screenshot default, and responsive widths on this device.
-- PageLens does not request access to all websites, run analytics, or use a remote service.
+- PageLens does not request access to all websites or run analytics. Optional font and asset requests go directly to their source hosts.
 
 ## Install in Chrome
 
