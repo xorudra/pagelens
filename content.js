@@ -118,9 +118,11 @@
       .stack{display:grid;gap:8px}
       .kv{display:grid;grid-template-columns:115px minmax(0,1fr);gap:8px;padding:7px 0;border-bottom:1px solid #30313c;align-items:start}
       .kv:last-child{border-bottom:0}.key{color:#b7b9c5;font-weight:600}.value{overflow-wrap:anywhere;color:#f0eff6}
-      textarea, input[type=text], select{width:100%;background:#15161d;color:#f5f5fa;border:1px solid #3a3c49;border-radius:9px;padding:11px;outline:none;font-size:14px;line-height:1.45}
+      textarea, input[type=text], input[type=search], select{width:100%;background:#15161d;color:#f5f5fa;border:1px solid #3a3c49;border-radius:9px;padding:11px;outline:none;font-size:14px;line-height:1.45}
       textarea{min-height:125px;resize:vertical;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
       .code{min-height:90px}.hint{padding:12px;border-radius:10px;background:#1a1c25;color:#d0d1dc;font-size:13px;font-weight:500;line-height:1.45}
+      .code-search{display:flex;gap:8px;align-items:center;margin-top:8px}.code-search input{flex:1;min-width:130px}.code-search button{flex:none}
+      .asset-report{margin-top:12px;border:1px solid #3a3c49;border-radius:10px;background:#171820;overflow:hidden}.asset-report summary{padding:11px 12px;cursor:pointer;font-size:13px;font-weight:700;color:#ecebf3}.asset-report[open] summary{border-bottom:1px solid #343541}.asset-report-list{padding:0 12px 8px}.asset-report-item{padding:10px 0;border-bottom:1px solid #30313c}.asset-report-item:last-child{border:0}.asset-report-top{display:flex;gap:8px;align-items:center;justify-content:space-between}.asset-report-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-report-status{flex:none;border-radius:999px;padding:3px 8px;background:#292b36;color:#dedce7;font-size:11px;font-weight:700}.asset-report-status.included{background:#17382c;color:#b8f2ce}.asset-report-status.failed{background:#3b2927;color:#ffc9bb}.asset-report-status.skipped{background:#35313f;color:#ddd0ff}.asset-report-path,.asset-report-url{overflow-wrap:anywhere;word-break:break-all}
       .swatch{display:flex;gap:10px;align-items:center;width:100%;padding:8px;background:transparent;border:0;text-align:left;border-radius:8px}
       .chip{width:23px;height:23px;border:1px solid #fff4;border-radius:6px;flex:none}
       .asset{padding:9px 0;border-bottom:1px solid #30313c}.asset:last-child{border:0}
@@ -158,8 +160,8 @@
   const nav = shadow.getElementById("nav");
   const highlight = shadow.getElementById("highlight");
   const toast = shadow.getElementById("toast");
-  const defaultPreferences = { dock: "bottom", captureMode: "visible", responsiveWidths: [375, 768, 1280], toolOrder: tools.map((item) => item[0]) };
-  const state = { tool: null, selected: null, picking: false, measuring: false, fontInspecting: false, firstPoint: null, history: [], fontStyle: null, fontLink: null, fontCatalog: null, fontCatalogLoading: false, fontCatalogLoaded: false, responsiveFrames: [], screenshotCanvas: null, originalScreenshot: null, editorMode: "view", editorHistory: [], editorRedo: [], annotationColor: "#ff4d8d", annotationText: "Note", captureCancel: false, capturing: false, assets: null, selectedAssets: new Set(), clonePreviewHtml: "", cloneCodeHtml: "", clonePreviewCss: "", cloneCodeTab: "html", preferences: { ...defaultPreferences } };
+  const defaultPreferences = { dock: "bottom", captureMode: "visible", responsiveWidths: [375, 768, 1280], toolOrder: tools.map((item) => item[0]), cloneIncludes: { assets: true, fonts: true, media: true } };
+  const state = { tool: null, selected: null, picking: false, measuring: false, fontInspecting: false, firstPoint: null, history: [], fontStyle: null, fontLink: null, fontCatalog: null, fontCatalogLoading: false, fontCatalogLoaded: false, responsiveFrames: [], screenshotCanvas: null, originalScreenshot: null, editorMode: "view", editorHistory: [], editorRedo: [], annotationColor: "#ff4d8d", annotationText: "Note", captureCancel: false, capturing: false, assets: null, selectedAssets: new Set(), clonePreviewHtml: "", cloneCodeHtml: "", clonePreviewCss: "", cloneCodeTab: "html", cloneCodeFindCursor: 0, cloneAssetReport: null, preferences: { ...defaultPreferences } };
   const icons = [
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M10 8l6 7-3 .2 1.2 3.3-1.8.7-1.3-3.3-2 2z"/></svg>`,
     `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="1.5"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>`,
@@ -195,6 +197,77 @@
   }
   function kv(key, value) {
     return `<div class="kv"><div class="key">${esc(key)}</div><div class="value">${esc(value)}</div></div>`;
+  }
+  function cloneAssetReportMarkup() {
+    const report = state.cloneAssetReport;
+    if (!report) return `<div class="hint" style="margin-top:12px">Download the ZIP to check which external assets can be included.</div>`;
+    if (!report.checked) return `<div class="hint" style="margin-top:12px">Asset downloads happen when you create the ZIP. This preview did not fetch external files${report.total ? ` · ${report.total} found` : " · no external assets found"}.</div>`;
+    const included = report.items.filter((item) => item.status === "included").length;
+    const failed = report.items.filter((item) => item.status === "failed").length;
+    const notRequested = report.items.filter((item) => item.status === "not-requested").length + report.unlistedNotRequested;
+    const skipped = report.items.filter((item) => item.status === "skipped").length + report.unlistedRequested;
+    const title = `Asset results · ${included} saved · ${failed} unavailable · ${notRequested} not requested · ${skipped} not checked`;
+    const rows = report.items.slice(0, 45).map((item) => {
+      const statusClass = item.status === "included" ? "included" : item.status === "failed" ? "failed" : "skipped";
+      const statusLabel = item.status === "included" ? "Included" : item.status === "failed" ? "Not included" : item.status === "not-requested" ? "Not requested" : "Not checked";
+      const detail = item.status === "included" ? kv("ZIP file", item.packagePath) : kv("Details", item.reason || "The asset remains linked to its source URL.");
+      return `<div class="asset-report-item"><div class="asset-report-top"><strong class="asset-report-title">${esc(item.category ? `${item.category} · ${item.alt || item.type || "Asset"}` : item.alt || item.type || "Asset")}</strong><span class="asset-report-status ${statusClass}">${statusLabel}</span></div>${detail}<div class="muted asset-report-url">${esc(item.url)}</div></div>`;
+    }).join("");
+    const note = report.note ? `<div class="muted" style="padding:8px 0 2px">${esc(report.note)}</div>` : "";
+    return `<details class="asset-report"><summary>${esc(title)}</summary><div class="asset-report-list">${note}${rows || `<div class="muted" style="padding:10px 0">No external image, font, or media assets were found.</div>`}</div></details>`;
+  }
+  function cloneAssetCategory(type) {
+    if (type === "Font") return "fonts";
+    if (["Video", "Media"].includes(type)) return "media";
+    return "assets";
+  }
+  function cloneAssetSelected(type, options) {
+    return Boolean(options[cloneAssetCategory(type)]);
+  }
+  function formatCloneHtml(source) {
+    const voidTags = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
+    const tokens = String(source).match(/<!--[\s\S]*?-->|<![^>]*>|<\/?[\w:-]+(?:\s[^<>]*?)?\/?>|[^<]+/g) || [String(source)];
+    const lines = []; let depth = 0, preserve = 0;
+    for (const token of tokens) {
+      const trimmed = token.trim();
+      if (!trimmed) continue;
+      if (trimmed.startsWith("</")) {
+        const name = trimmed.match(/^<\/([\w:-]+)/)?.[1]?.toLowerCase();
+        if (name === "pre" || name === "textarea") preserve = Math.max(0, preserve - 1);
+        depth = Math.max(0, depth - 1);
+        lines.push(`${"  ".repeat(depth)}${trimmed}`);
+      } else if (trimmed.startsWith("<") && !trimmed.startsWith("<!--") && !trimmed.startsWith("<!")) {
+        lines.push(`${"  ".repeat(depth)}${trimmed}`);
+        const name = trimmed.match(/^<([\w:-]+)/)?.[1]?.toLowerCase();
+        if (name === "pre" || name === "textarea") preserve++;
+        if (name && !voidTags.has(name) && !trimmed.endsWith("/>") && !trimmed.startsWith("<?")) depth++;
+      } else if (trimmed.startsWith("<!") || trimmed.startsWith("<!--")) {
+        lines.push(`${"  ".repeat(depth)}${trimmed}`);
+      } else {
+        const text = preserve ? token.replace(/^\s+|\s+$/g, "") : trimmed.replace(/\s+/g, " ");
+        if (text) lines.push(`${"  ".repeat(depth)}${text}`);
+      }
+    }
+    return lines.join("\n");
+  }
+  function formatCloneCss(source) {
+    const lines = []; let line = "", depth = 0, quote = "", escaped = false, comment = false, parens = 0;
+    const flush = () => { const text = line.trim(); if (text) lines.push(`${"  ".repeat(Math.max(0, depth))}${text}`); line = ""; };
+    for (let index = 0; index < source.length; index++) {
+      const ch = source[index], next = source[index + 1];
+      if (comment) { line += ch; if (ch === "*" && next === "/") { line += "/"; index++; comment = false; } continue; }
+      if (quote) { line += ch; if (escaped) escaped = false; else if (ch === "\\") escaped = true; else if (ch === quote) quote = ""; continue; }
+      if (ch === "/" && next === "*") { line += "/*"; index++; comment = true; continue; }
+      if (ch === '"' || ch === "'") { line += ch; quote = ch; continue; }
+      if (ch === "(") parens++;
+      if (ch === ")") parens = Math.max(0, parens - 1);
+      if (parens === 0 && ch === "{") { line = `${line.trimEnd()} {`; flush(); depth++; }
+      else if (parens === 0 && ch === ";") { line += ch; flush(); }
+      else if (parens === 0 && ch === "}") { flush(); depth = Math.max(0, depth - 1); lines.push(`${"  ".repeat(depth)}}`); }
+      else line += ch;
+    }
+    flush();
+    return lines.join("\n");
   }
   function navMarkup() {
     const ordered = state.preferences.toolOrder.map((id) => tools.find((item) => item[0] === id)).filter(Boolean);
@@ -232,6 +305,11 @@
           state.preferences = {
             ...defaultPreferences,
             ...saved,
+            cloneIncludes: {
+              assets: typeof saved.cloneIncludes?.assets === "boolean" ? saved.cloneIncludes.assets : true,
+              fonts: typeof saved.cloneIncludes?.fonts === "boolean" ? saved.cloneIncludes.fonts : true,
+              media: typeof saved.cloneIncludes?.media === "boolean" ? saved.cloneIncludes.media : true
+            },
             responsiveWidths: Array.isArray(saved.responsiveWidths) ? [...new Set(saved.responsiveWidths.map(Number).filter((width) => Number.isInteger(width) && width >= 280 && width <= 2560))] : defaultPreferences.responsiveWidths,
             toolOrder: Array.isArray(saved.toolOrder) ? [...new Set(saved.toolOrder.filter((id) => tools.some((item) => item[0] === id))), ...tools.map((item) => item[0]).filter((id) => !saved.toolOrder.includes(id))] : defaultPreferences.toolOrder
           };
@@ -353,21 +431,52 @@
   function scanAssets() {
     const result = [];
     const seen = new Set();
-    const add = (url, type, el) => {
+    const add = (url, type, el, alt = "") => {
       if (!url || (url.startsWith("data:") && type !== "SVG") || seen.has(`${type}:${url}`)) return;
       seen.add(`${type}:${url}`);
-      result.push({ url, type, alt: el?.alt || el?.getAttribute("aria-label") || "", preview: ["Image", "SVG", "Background"].includes(type) ? url : "" });
+      result.push({ url, type, alt: alt || el?.alt || el?.getAttribute?.("aria-label") || "", preview: ["Image", "SVG", "Background"].includes(type) ? url : "" });
     };
-    for (const el of Array.from(document.querySelectorAll("img,video,source,svg,body *")).slice(0, 3500)) {
+    const addFontUrls = (src, base, family = "") => {
+      for (const match of String(src || "").matchAll(/url\(\s*(?:(['"])(.*?)\1|([^)]*?))\s*\)/gi)) {
+        const value = String(match[2] ?? match[3] ?? "").trim();
+        if (!value || /^(?:data:|blob:)/i.test(value)) continue;
+        try {
+          const url = new URL(value, base).href;
+          if (/^https?:/i.test(url)) add(url, "Font", null, family.replace(/^['"]|['"]$/g, ""));
+        } catch (_) {}
+      }
+    };
+    const visitFontRules = (rules, base, depth = 0) => {
+      if (!rules || depth > 4) return;
+      for (const rule of Array.from(rules)) {
+        if (rule.type === 5 || rule.constructor?.name === "CSSFontFaceRule") {
+          addFontUrls(rule.style?.getPropertyValue("src"), base, rule.style?.getPropertyValue("font-family") || "");
+        }
+        if (rule.styleSheet) {
+          try { visitFontRules(rule.styleSheet.cssRules, rule.styleSheet.href || base, depth + 1); } catch (_) {}
+        } else if (rule.cssRules) visitFontRules(rule.cssRules, base, depth + 1);
+      }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+      try { visitFontRules(sheet.cssRules, sheet.href || document.baseURI); } catch (_) {}
+    }
+    for (const link of document.querySelectorAll('link[rel~="preload"][as="font"]')) add(link.href, "Font", null);
+    try {
+      for (const entry of performance.getEntriesByType("resource")) {
+        if (/\.(?:woff2?|ttf|otf|eot)(?:[?#]|$)/i.test(entry.name)) add(entry.name, "Font", null);
+      }
+    } catch (_) {}
+    for (const el of Array.from(document.querySelectorAll("img,video,audio,source,svg,body *")).slice(0, 3500)) {
       if (host.contains(el)) continue;
       if (el.tagName === "IMG") add(el.currentSrc || el.src, "Image", el);
       else if (el.tagName === "VIDEO") add(el.currentSrc || el.src || el.poster, "Video", el);
+      else if (el.tagName === "AUDIO") add(el.currentSrc || el.src, "Media", el);
       else if (el.tagName === "SOURCE") add(el.src, "Media", el);
       else if (el.localName?.toLowerCase() === "svg") add(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(el.outerHTML)}`, "SVG", el);
       const bg = getComputedStyle(el).backgroundImage;
       for (const match of bg.matchAll(/url\(["']?(.*?)["']?\)/g)) add(new URL(match[1], location.href).href, "Background", el);
     }
-    return result.slice(0, 200);
+    return result.slice(0, 250);
   }
   function filteredAssets() {
     const items = state.assets || (state.assets = scanAssets());
@@ -394,7 +503,11 @@
     const d = pageDetails();
     return `Create an original web page inspired by the design characteristics below. Do not reuse the source brand, wording, imagery, or proprietary assets.\n\nPage context: ${d.title}\nDescription: ${d.description || "Not provided"}\nViewport reviewed: ${d.viewport}\n\nVisual direction\n- Main colors: ${d.colors.slice(0, 8).map((c) => c.color).join(", ") || "not detected"}\n- Typography: ${d.fonts.slice(0, 8).map((f) => `${f.fontFamily} ${f.fontSize} / ${f.fontWeight}`).join("; ") || "not detected"}\n- Spacing patterns: ${d.spacing.slice(0, 8).map((item) => item.value).join("; ") || "not detected"}\n- Content structure: ${d.headings.join(" → ") || "inspect the page sample"}\n\nBuild an accessible, responsive implementation with clear spacing, reusable components, and original copy and visual assets. Use the extracted details as a starting point and make your own design decisions.`;
   }
-  async function makeStaticClone(includeAssets = true, previewOnly = false) {
+  async function makeStaticClone(assetOptions = { assets: true, fonts: true, media: true }, previewOnly = false) {
+    const includeOptions = typeof assetOptions === "boolean"
+      ? { assets: assetOptions, fonts: assetOptions, media: assetOptions }
+      : { assets: true, fonts: true, media: true, ...(assetOptions || {}) };
+    const categoryNames = { assets: "Images & assets", fonts: "Fonts", media: "Media" };
     const clone = document.documentElement.cloneNode(true);
     const sourceNodes = [document.documentElement, ...document.documentElement.querySelectorAll("*")];
     const cloneNodes = [clone, ...clone.querySelectorAll("*")];
@@ -430,19 +543,44 @@
     clone.querySelector("head")?.appendChild(stylesheet);
     let html = `<!doctype html>\n${clone.outerHTML}`;
     let styles = collectPageStyles();
-    const foundAssets = scanAssets().filter((item) => /^https?:/i.test(item.url)).slice(0, 150);
+    const allFoundAssets = scanAssets().filter((item) => /^https?:/i.test(item.url));
+    const foundAssets = allFoundAssets.slice(0, 150);
+    const assetLimit = 45;
+    const fetchCandidates = foundAssets.map((item, reportIndex) => ({ item, reportIndex })).filter(({ item }) => cloneAssetSelected(item.type, includeOptions));
+    const checkedCandidates = fetchCandidates.slice(0, assetLimit);
+    const checkedIndexes = new Set(checkedCandidates.map(({ reportIndex }) => reportIndex));
+    const unlistedAssets = allFoundAssets.slice(foundAssets.length);
+    const unlistedRequested = unlistedAssets.filter((item) => cloneAssetSelected(item.type, includeOptions)).length;
+    state.cloneAssetReport = {
+      items: foundAssets.map((item, index) => {
+        const category = cloneAssetCategory(item.type);
+        const selected = cloneAssetSelected(item.type, includeOptions);
+        const status = !selected ? "not-requested" : checkedIndexes.has(index) ? "pending" : "skipped";
+        const reason = !selected ? `${categoryNames[category]} were not selected for this ZIP.` : status === "skipped" ? `The ZIP checks up to ${assetLimit} selected external assets.` : "Waiting for the ZIP check.";
+        return { ...item, category, status, reason };
+      }),
+      total: allFoundAssets.length,
+      unlisted: Math.max(0, allFoundAssets.length - foundAssets.length),
+      unlistedRequested,
+      unlistedNotRequested: Math.max(0, unlistedAssets.length - unlistedRequested),
+      requestedCategories: includeOptions,
+      requested: Object.values(includeOptions).some(Boolean),
+      checked: !previewOnly,
+      note: allFoundAssets.length > foundAssets.length ? `Showing the first ${foundAssets.length} of ${allFoundAssets.length} external asset URLs.` : ""
+    };
     const packaged = [];
     const assetPaths = new Map();
     let assetBytes = 0;
-    if (includeAssets) {
-      setStatus("Finding assets the page allows PageLens to save…");
-      for (let index = 0; index < Math.min(foundAssets.length, 45); index++) {
-        const item = foundAssets[index];
+    if (checkedCandidates.length) {
+      setStatus(`Checking selected assets · 0 of ${checkedCandidates.length}…`);
+      for (let index = 0; index < checkedCandidates.length; index++) {
+        const { item, reportIndex } = checkedCandidates[index];
+        let timeout;
         try {
+          setStatus(`Checking selected assets · ${index + 1} of ${checkedCandidates.length}…`);
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 7000);
+          timeout = setTimeout(() => controller.abort(), 7000);
           const response = await fetch(item.url, { mode: "cors", credentials: "omit", signal: controller.signal });
-          clearTimeout(timeout);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const type = (response.headers.get("content-type") || "").split(";")[0].toLowerCase();
           if (type && !/^(image\/|font\/|audio\/|video\/|application\/font|application\/vnd\.ms-fontobject|application\/octet-stream)/.test(type)) throw new Error("Not an image, font, or media file");
@@ -464,6 +602,7 @@
           if (!byteCount || byteCount > 1500000 || assetBytes + byteCount > 8000000) throw new Error("Asset exceeds the ZIP size limit");
           const bytes = new Uint8Array(byteCount); let byteOffset = 0;
           for (const chunk of chunks) { bytes.set(chunk, byteOffset); byteOffset += chunk.length; }
+          clearTimeout(timeout);
           const pathName = (() => { try { return decodeURIComponent(new URL(item.url).pathname.split("/").pop() || "asset"); } catch (_) { return "asset"; } })();
           let ext = pathName.match(/\.[a-z0-9]{1,8}$/i)?.[0] || "";
           if (!/^(?:\.png|\.jpe?g|\.gif|\.webp|\.avif|\.svg|\.ico|\.woff2?|\.ttf|\.otf|\.eot|\.mp3|\.mp4|\.webm|\.ogg)$/i.test(ext)) ext = "";
@@ -472,8 +611,11 @@
           assetPaths.set(item.url, packagePath);
           packaged.push({ name: packagePath, bytes });
           assetBytes += bytes.length;
-        } catch (_) {
-          // CORS, unavailable files, or ZIP limits leave this asset linked to its original URL.
+          Object.assign(state.cloneAssetReport.items[reportIndex], { status: "included", reason: "", packagePath, bytes: bytes.length, contentType: type || "unknown" });
+        } catch (error) {
+          clearTimeout(timeout);
+          const reason = error?.name === "AbortError" ? "Timed out after 7 seconds." : String(error?.message || "The source host did not allow access.").slice(0, 180);
+          Object.assign(state.cloneAssetReport.items[reportIndex], { status: "failed", reason });
         }
       }
     }
@@ -491,6 +633,7 @@
         styles = styles.replaceAll(url, packagePath);
       }
     }
+    state.cloneAssetReport.checked = !previewOnly;
     state.cloneCodeHtml = html;
     state.clonePreviewCss = styles || "/* No accessible stylesheet rules were found. Computed styles are saved inline in the HTML. */\n";
     state.clonePreviewHtml = html.replace(/<link rel="stylesheet" href="styles\.css">/i, "");
@@ -501,18 +644,22 @@
       setStatus("Snapshot preview ready. External page scripts are disabled.");
       return;
     }
-    const assets = foundAssets.map(({ type, alt, url }) => ({ type, alt, url, included: assetPaths.has(url), ...(assetPaths.has(url) ? { packagePath: assetPaths.get(url) } : {}) }));
-    const readme = `# ${document.title || "PageLens UI snapshot"}\n\nThis ZIP contains a local snapshot of the rendered page UI.\n\n- Open index.html in a browser to view the snapshot.\n- styles.css contains readable page rules that the browser allowed PageLens to collect. Key computed styles are also saved inline in the HTML.\n- assets.json lists referenced images and media. Those assets remain hosted at their original URLs and may need an internet connection.\n\nThis is a rendered UI snapshot, not the website's original source project. Scripts and embedded frames are removed for safety, so app behavior, server code, and backend features are not included.\n\nSource page: ${location.href}\nCaptured viewport: ${innerWidth} × ${innerHeight}\n`;
+    const assets = state.cloneAssetReport.items.map(({ type, category, alt, url, status, reason, packagePath, bytes, contentType }) => ({ type, category, alt, url, included: status === "included", status, ...(reason ? { reason } : {}), ...(packagePath ? { packagePath, bytes, contentType } : {}) }));
+    const selectedCategories = Object.entries(includeOptions).filter(([, enabled]) => enabled).map(([key]) => categoryNames[key]).join(", ") || "none";
+    const readme = `# ${document.title || "PageLens UI snapshot"}\n\nThis ZIP contains a local snapshot of the rendered page UI.\n\n- Open index.html in a browser to view the snapshot.\n- styles.css contains readable page rules that the browser allowed PageLens to collect. Key computed styles are also saved inline in the HTML.\n- assets.json records each listed external image, font, or media URL, its category, whether it was copied, and why it could not be included. It lists up to ${foundAssets.length} URLs; ${state.cloneAssetReport.unlisted} more URLs were outside that listing limit.\n- Selected categories: ${selectedCategories}. PageLens checked up to ${checkedCandidates.length} selected assets and copied ${assetPaths.size} into assets/.\n- Assets excluded by your choices remain linked to their original URLs. Other files may also remain linked if their source blocks access or they exceed size limits.\n\nThis is a rendered UI snapshot, not the website's original source project. Scripts and embedded frames are removed for safety, so app behavior, server code, and backend features are not included.\n\nSource page: ${location.href}\nCaptured viewport: ${innerWidth} × ${innerHeight}\n`;
     const zip = makeZip([
       { name: "index.html", content: html },
       { name: "styles.css", content: styles || "/* PageLens saved the available computed styles inline in index.html. */\n" },
       { name: "assets.json", content: JSON.stringify(assets, null, 2) },
-      { name: "README.md", content: readme.replace("Those assets remain hosted at their original URLs and may need an internet connection.", `${assetPaths.size} assets were copied into the assets/ folder when the source site allowed it; remaining assets stay linked to their original URLs and may need an internet connection.`) },
+      { name: "README.md", content: readme },
       ...packaged
     ]);
     downloadBlob(zip, `${safeFilename(document.title || "page")}-ui.zip`);
     render();
-    setStatus(`ZIP ready · ${assetPaths.size} of ${foundAssets.length} assets included.`);
+    const failed = state.cloneAssetReport.items.filter((item) => item.status === "failed").length;
+    const notRequested = state.cloneAssetReport.items.filter((item) => item.status === "not-requested").length + state.cloneAssetReport.unlistedNotRequested;
+    const unchecked = state.cloneAssetReport.items.filter((item) => item.status === "skipped").length + state.cloneAssetReport.unlistedRequested;
+    setStatus(`ZIP ready · ${assetPaths.size} assets included${failed ? ` · ${failed} unavailable` : ""}${notRequested ? ` · ${notRequested} not requested` : ""}${unchecked ? ` · ${unchecked} not checked` : ""}. Open Asset results for details.`);
   }
   function collectPageStyles() {
     const chunks = [];
@@ -951,12 +1098,13 @@
     const promptText = state.tool === "prompt" ? designPrompt() : "";
     const cloneCodeText = state.cloneCodeTab === "css" ? state.clonePreviewCss : state.cloneCodeHtml;
     const cloneCodeLimit = 120000;
-    const cloneCodeExcerpt = cloneCodeText.slice(0, cloneCodeLimit);
-    const cloneCodeHint = cloneCodeText.length > cloneCodeLimit ? `Showing the first ${cloneCodeLimit.toLocaleString()} characters. The ZIP contains the complete file.` : "Read-only preview of the generated ZIP file.";
+    const cloneCodeDisplay = state.cloneCodeTab === "css" ? formatCloneCss(cloneCodeText) : formatCloneHtml(cloneCodeText);
+    const cloneCodeExcerpt = cloneCodeDisplay.slice(0, cloneCodeLimit);
+    const cloneCodeHint = cloneCodeDisplay.length > cloneCodeLimit ? `Formatted preview · showing the first ${cloneCodeLimit.toLocaleString()} characters. The ZIP contains the complete file.` : "Formatted read-only preview. Copy copies the formatted code; Save exports the original ZIP file.";
     const pages = {
       home: `<div class="welcome"><h1>See the details behind a page.</h1><p>Choose a tool, then work with the page open behind this panel.</p><div class="card"><h2>Quick start</h2><div class="feature">1. Pick an element to inspect its structure and styles.</div><div class="feature">2. Collect colors, type, and assets as references.</div><div class="feature">3. Try local edits or capture the visible page.</div></div><div class="hint">PageLens reads the page currently open in this tab. Edits are temporary and disappear when you reload.</div><h2>Selected element</h2>${selected || `<div class="muted">Nothing selected yet.</div>`}</div>`,
       pick: `<h1>Pick element</h1><p>Select a component to preview its rendered appearance, then inspect or save its HTML and CSS.</p>${button("Pick on page", "pick", true)}${selected || ""}${info ? `<h2>Component preview</h2><iframe id="pick-preview-frame" title="Selected element preview" sandbox="" style="width:100%;height:220px;border:1px solid #3a3c49;border-radius:10px;background:white"></iframe><h2>HTML</h2><textarea class="code" readonly>${esc(info.el.outerHTML.slice(0, 12000))}</textarea><div class="row">${button("Copy HTML", "copy-html")}${button("Save HTML", "save-html")}${button("Copy CSS", "copy-css")}${button("Save CSS", "save-css")}</div><h2>Computed styles</h2><textarea class="code" readonly>${esc(computedFor(info.el))}</textarea>` : ""}<div class="status"></div>`,
-      clone: `<h1>Clone page</h1><p>Preview the rendered page snapshot and inspect its generated HTML and CSS before saving a ZIP.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("ZIP contents", "index.html · styles.css · assets/ · assets.json · README.md")}</div><label class="check-row"><input id="clone-include-assets" type="checkbox" checked> Include accessible images, fonts, and media in ZIP</label><div class="hint" style="margin-top:10px">Cross site asset servers may block downloads. Blocked files stay linked to their original URL. Scripts and embedded frames are removed; this is a rendered snapshot, not the original source project.</div><div class="row" style="margin-top:12px">${button("Preview snapshot", "preview-clone")}${button("Download UI ZIP", "clone", true)}</div>${state.clonePreviewHtml ? `<h2>Snapshot preview</h2><iframe id="clone-preview-frame" title="Page snapshot preview" sandbox="" style="width:100%;height:360px;border:1px solid #3a3c49;border-radius:10px;background:white"></iframe><div class="row" style="margin-top:14px"><h2 style="margin:0;flex:1">Generated code</h2>${button(`Copy ${state.cloneCodeTab.toUpperCase()}`, "clone-copy-code")}</div><div class="row" role="tablist" aria-label="Generated code file">${button("HTML · index.html", "clone-code-html", state.cloneCodeTab === "html")}${button("CSS · styles.css", "clone-code-css", state.cloneCodeTab === "css")}</div><textarea class="code" id="clone-code-source" aria-label="Generated ${state.cloneCodeTab.toUpperCase()} code" readonly spellcheck="false" style="height:230px;max-height:36vh;resize:vertical">${esc(cloneCodeExcerpt)}</textarea><div class="muted" style="margin-top:5px">${cloneCodeHint}</div>` : ""}<div class="status"></div>`,
+      clone: `<h1>Clone page</h1><p>Preview the rendered page snapshot and inspect its generated HTML and CSS before saving a ZIP.</p><div class="card">${kv("Source", location.hostname)}${kv("Page title", document.title)}${kv("ZIP contents", "index.html · styles.css · assets/ · assets.json · README.md")}</div><div class="muted" style="margin:10px 0 6px">Choose what to include in the ZIP</div><div class="row"><label class="check-row"><input id="clone-include-assets" type="checkbox" ${state.preferences.cloneIncludes.assets ? "checked" : ""}> Images &amp; assets</label><label class="check-row"><input id="clone-include-fonts" type="checkbox" ${state.preferences.cloneIncludes.fonts ? "checked" : ""}> Fonts</label><label class="check-row"><input id="clone-include-media" type="checkbox" ${state.preferences.cloneIncludes.media ? "checked" : ""}> Media (video &amp; audio)</label></div><div class="hint" style="margin-top:10px">Your choices are saved on this browser. Cross site asset servers may block downloads; unavailable files stay linked to their original URL. Scripts and embedded frames are removed; this is a rendered snapshot, not the original source project.</div><div class="row" style="margin-top:12px">${button("Preview snapshot", "preview-clone")}${button("Download UI ZIP", "clone", true)}</div>${state.clonePreviewHtml ? `<h2>Snapshot preview</h2><iframe id="clone-preview-frame" title="Page snapshot preview" sandbox="" style="width:100%;height:360px;border:1px solid #3a3c49;border-radius:10px;background:white"></iframe><div class="row" style="margin-top:14px"><h2 style="margin:0;flex:1">Generated code</h2>${button(`Copy ${state.cloneCodeTab.toUpperCase()}`, "clone-copy-code")}${button(`Save ${state.cloneCodeTab.toUpperCase()}`, "clone-save-code")}</div><div class="row" role="tablist" aria-label="Generated code file">${button("HTML · index.html", "clone-code-html", state.cloneCodeTab === "html")}${button("CSS · styles.css", "clone-code-css", state.cloneCodeTab === "css")}</div><div class="code-search"><input type="search" id="clone-code-search" aria-label="Find in ${state.cloneCodeTab.toUpperCase()}" placeholder="Find in ${state.cloneCodeTab === "html" ? "index.html" : "styles.css"}">${button("Find next", "clone-find-code")}</div><textarea class="code" id="clone-code-source" aria-label="Generated ${state.cloneCodeTab.toUpperCase()} code" readonly spellcheck="false" style="height:230px;max-height:36vh;resize:vertical">${esc(cloneCodeExcerpt)}</textarea><div class="muted" id="clone-code-hint" style="margin-top:5px">${cloneCodeHint}</div>` : ""}${cloneAssetReportMarkup()}<div class="status"></div>`,
       "design-md": `<h1>Design MD</h1><p>Review a visual reference of this page, then save the colors, typography, spacing, and layout notes as Markdown.</p><div class="card">${kv("Page", document.title)}${kv("URL", location.href)}${kv("Viewport", `${innerWidth} × ${innerHeight}`)}<h2>Color palette</h2><div class="row">${colorList(designDetails.colors.slice(0, 10))}</div><h2>Typography samples</h2>${fontList(designDetails.fonts.slice(0, 6))}<h2>Spacing tokens</h2>${designDetails.spacing.slice(0, 10).map((item) => `<div class="row asset">${kv(item.value, `${item.count} uses`)}</div>`).join("") || `<div class="muted">No spacing tokens found.</div>`}</div><div class="row">${button("Download Design MD", "design-md", true)}${button("Copy Markdown", "copy-md")}</div><div class="status"></div>`,
       prompt: `<h1>Design prompt</h1><p>Turn the observed design details into an original implementation brief.</p><textarea id="prompt-text">${esc(promptText)}</textarea><div class="row">${button("Copy prompt", "copy-prompt", true)}${button("Download .txt", "download-prompt")}</div><div class="status"></div>`,
       assets: `<h1>Extract assets</h1><p>Filter page images and media, copy their URLs, or bundle files the source host allows PageLens to fetch.</p><div class="row">${button("Rescan assets", "refresh-assets")}<select id="assets-filter" aria-label="Filter asset type"><option value="all">All types</option><option value="image">Images & backgrounds</option><option value="SVG">Inline SVG</option><option value="media">Video & media</option></select><input id="asset-search" type="text" placeholder="Search name or URL" aria-label="Search assets"></div><div class="row" style="margin-top:8px">${button("Copy visible URLs", "copy-asset-urls")}${button("Download selected ZIP", "download-assets-zip", true)}${button("Download visible ZIP", "download-visible-assets")}</div><div class="muted" style="margin:6px 0">${state.selectedAssets.size} selected</div><div id="assets-list" class="stack">${assetsList(filteredAssets())}</div><div class="status"></div>`,
@@ -1024,6 +1172,8 @@
     const target = event.target;
     if (target.id === "dock-choice") state.preferences.dock = target.value;
     if (target.id === "capture-default") state.preferences.captureMode = target.value;
+    const cloneIncludeKey = { "clone-include-assets": "assets", "clone-include-fonts": "fonts", "clone-include-media": "media" }[target.id];
+    if (cloneIncludeKey) state.preferences.cloneIncludes[cloneIncludeKey] = target.checked;
     if (target.id === "annotation-color") state.annotationColor = target.value;
     if (target.id === "annotation-text") state.annotationText = target.value;
     if (target.matches("[data-responsive-width]")) {
@@ -1043,6 +1193,7 @@
   shadow.addEventListener("input", (event) => {
     const target = event.target;
     if (target.id === "asset-search") { main.querySelector("#assets-list").innerHTML = assetsList(filteredAssets()); return; }
+    if (target.id === "clone-code-search") { state.cloneCodeFindCursor = 0; return; }
     if (target.id === "annotation-color") state.annotationColor = target.value;
     if (target.id === "annotation-text") state.annotationText = target.value;
     if (target.id === "responsive-scale") { const label = target.parentElement?.nextElementSibling; if (label) label.textContent = `${target.value}%`; }
@@ -1064,10 +1215,45 @@
     if (action === "font-hover") { state.fontInspecting = !state.fontInspecting; if (!state.fontInspecting) { highlight.style.display = "none"; highlight.removeAttribute("data-font-tip"); } render(); if (state.fontInspecting) notify("Hover over text on the page to inspect its typography."); return; }
     if (action === "pick") return activatePick();
     if (action === "measure") return activatePick(true);
-    if (action === "preview-clone") { setStatus("Preparing a safe snapshot preview…"); await makeStaticClone(false, true); return; }
-    if (action === "clone-code-html" || action === "clone-code-css") { state.cloneCodeTab = action === "clone-code-css" ? "css" : "html"; render(); return; }
-    if (action === "clone-copy-code") return copy(state.cloneCodeTab === "css" ? state.clonePreviewCss : state.cloneCodeHtml);
-    if (action === "clone") { setStatus("Building the page snapshot ZIP…"); await makeStaticClone(main.querySelector("#clone-include-assets")?.checked !== false); notify("Page UI ZIP downloaded."); return; }
+    if (action === "preview-clone") { setStatus("Preparing a safe snapshot preview…"); await makeStaticClone({ assets: false, fonts: false, media: false }, true); return; }
+    if (action === "clone-code-html" || action === "clone-code-css") { state.cloneCodeTab = action === "clone-code-css" ? "css" : "html"; state.cloneCodeFindCursor = 0; render(); return; }
+    if (action === "clone-copy-code") return copy(state.cloneCodeTab === "css" ? formatCloneCss(state.clonePreviewCss) : formatCloneHtml(state.cloneCodeHtml));
+    if (action === "clone-save-code") {
+      const isCss = state.cloneCodeTab === "css";
+      downloadText(isCss ? state.clonePreviewCss : state.cloneCodeHtml, isCss ? "styles.css" : "index.html", isCss ? "text/css" : "text/html");
+      notify(`${isCss ? "styles.css" : "index.html"} saved.`);
+      return;
+    }
+    if (action === "clone-find-code") {
+      const source = main.querySelector("#clone-code-source"), input = main.querySelector("#clone-code-search"), query = input?.value.trim();
+      if (!source || !query) { setStatus("Enter text to find in the generated code."); return; }
+      const fullCode = state.cloneCodeTab === "css" ? formatCloneCss(state.clonePreviewCss) : formatCloneHtml(state.cloneCodeHtml);
+      const lowerCode = fullCode.toLowerCase(), lowerQuery = query.toLowerCase();
+      let index = lowerCode.indexOf(lowerQuery, state.cloneCodeFindCursor);
+      if (index < 0) index = lowerCode.indexOf(lowerQuery);
+      if (index < 0) { setStatus(`No match for “${query}”.`); return; }
+      const windowSize = 120000, windowStart = Math.min(Math.max(0, index - 30000), Math.max(0, fullCode.length - windowSize));
+      if (windowStart || fullCode.length > windowSize) source.value = fullCode.slice(windowStart, windowStart + windowSize);
+      const localIndex = index - windowStart;
+      source.focus(); source.setSelectionRange(localIndex, localIndex + query.length);
+      const line = fullCode.slice(0, index).split("\n").length;
+      const hint = main.querySelector("#clone-code-hint");
+      if (hint && windowStart) hint.textContent = `Showing the section around line ${line}. Find searches the full generated file.`;
+      state.cloneCodeFindCursor = index + query.length;
+      setStatus(`Match found on line ${line}.`);
+      return;
+    }
+    if (action === "clone") {
+      const includeOptions = {
+        assets: main.querySelector("#clone-include-assets")?.checked !== false,
+        fonts: main.querySelector("#clone-include-fonts")?.checked !== false,
+        media: main.querySelector("#clone-include-media")?.checked !== false
+      };
+      setStatus("Building the page snapshot ZIP…");
+      await makeStaticClone(includeOptions);
+      notify("Page UI ZIP downloaded.");
+      return;
+    }
     if (action === "design-md") { downloadText(detailsMarkdown(), `${safeFilename(document.title)}-design.md`, "text/markdown"); notify("Design MD downloaded."); return; }
     if (action === "copy-md") return copy(detailsMarkdown());
     if (action === "copy-prompt") return copy(main.querySelector("#prompt-text")?.value || designPrompt());
@@ -1222,3 +1408,4 @@
   render();
   loadPreferences();
 })();
+
