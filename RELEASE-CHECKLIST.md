@@ -8,7 +8,7 @@
 - [ ] Load the unpacked extension in Chrome and verify the shipped features
 - [ ] Capture at least one genuine extension screenshot (1280 × 800 or 640 × 400)
 - [ ] Complete the Chrome Web Store Privacy practices disclosures
-- [ ] Upload `pagelens-0.2.0.zip` from the repository root
+- [ ] Upload `pagelens.zip` from the repository root
 - [ ] Submit for review from the developer dashboard
 
 Chrome Web Store developer registration requires a one-time fee. Publishing also requires 2-Step Verification on the Google developer account. Do not submit until the package has been tested and all listing and privacy fields are accurate.
