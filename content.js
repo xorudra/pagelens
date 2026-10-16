@@ -363,7 +363,7 @@
       if (el.tagName === "IMG") add(el.currentSrc || el.src, "Image", el);
       else if (el.tagName === "VIDEO") add(el.currentSrc || el.src || el.poster, "Video", el);
       else if (el.tagName === "SOURCE") add(el.src, "Media", el);
-      else if (el.tagName === "SVG") add(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(el.outerHTML)}`, "SVG", el);
+      else if (el.localName?.toLowerCase() === "svg") add(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(el.outerHTML)}`, "SVG", el);
       const bg = getComputedStyle(el).backgroundImage;
       for (const match of bg.matchAll(/url\(["']?(.*?)["']?\)/g)) add(new URL(match[1], location.href).href, "Background", el);
     }
