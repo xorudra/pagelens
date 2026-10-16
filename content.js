@@ -491,10 +491,10 @@
         styles = styles.replaceAll(url, packagePath);
       }
     }
+    state.cloneCodeHtml = html;
+    state.clonePreviewCss = styles || "/* No accessible stylesheet rules were found. Computed styles are saved inline in the HTML. */\n";
+    state.clonePreviewHtml = html.replace(/<link rel="stylesheet" href="styles\.css">/i, "");
     if (previewOnly) {
-      state.cloneCodeHtml = html;
-      state.clonePreviewCss = styles || "/* No accessible stylesheet rules were found. Computed styles are saved inline in the HTML. */\n";
-      state.clonePreviewHtml = html.replace(/<link rel="stylesheet" href="styles\.css">/i, "");
       state.cloneCodeTab = "html";
       state.tool = "clone";
       render();
@@ -511,6 +511,7 @@
       ...packaged
     ]);
     downloadBlob(zip, `${safeFilename(document.title || "page")}-ui.zip`);
+    render();
     setStatus(`ZIP ready · ${assetPaths.size} of ${foundAssets.length} assets included.`);
   }
   function collectPageStyles() {
