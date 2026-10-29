@@ -120,7 +120,7 @@
       .kv:last-child{border-bottom:0}.key{color:#b7b9c5;font-weight:600}.value{overflow-wrap:anywhere;color:#f0eff6}
       textarea, input[type=text], input[type=search], select{width:100%;background:#15161d;color:#f5f5fa;border:1px solid #3a3c49;border-radius:9px;padding:11px;outline:none;font-size:14px;line-height:1.45}
       textarea{min-height:125px;resize:vertical;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
-      .code{min-height:90px}.hint{padding:12px;border-radius:10px;background:#1a1c25;color:#d0d1dc;font-size:13px;font-weight:500;line-height:1.45}
+      .code{min-height:90px}.code-editor{position:relative;max-height:42vh;overflow:auto;margin-top:8px;border:1px solid #343746;border-radius:10px;background:#0c0e14;scrollbar-width:thin;scrollbar-color:#555060 #0c0e14}.code-view{min-width:max-content;margin:0;padding:12px 0;border:0;border-radius:0;background:transparent;color:#d7deeb;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;tab-size:2;white-space:pre;overflow:visible}.code-view code{font:inherit}.code-line{display:block;position:relative;min-height:1.65em;padding:0 18px 0 68px;white-space:pre}.code-line::before{content:attr(data-line);position:absolute;left:0;top:0;width:52px;padding-right:14px;color:#747b8b;text-align:right;user-select:none}.code-line.active{background:#b58cff24;box-shadow:inset 2px 0 #b58cff}.code-language{display:inline-flex;align-items:center;padding:3px 7px;border:1px solid #4c3d68;border-radius:6px;background:#28213a;color:#d7c6ff;font:700 11px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.02em}.tok-tag,.tok-keyword{color:#c792ea}.tok-attribute,.tok-property,.tok-key,.tok-function{color:#82aaff}.tok-string{color:#c3e88d}.tok-comment{color:#788398;font-style:italic}.tok-punctuation,.tok-operator{color:#89ddff}.tok-meta{color:#ffcb6b}.tok-entity{color:#f78c6c}.tok-color,.tok-number{color:#f78c6c}.tok-variable{color:#f07178}.tok-heading{color:#ffcb6b;font-weight:700}.tok-inline-code{color:#c3e88d;background:#1a2630;border-radius:3px}.hint{padding:12px;border-radius:10px;background:#1a1c25;color:#d0d1dc;font-size:13px;font-weight:500;line-height:1.45}
       .code-search{display:flex;gap:8px;align-items:center;margin-top:8px}.code-search input{flex:1;min-width:130px}.code-search button{flex:none}
       .asset-report{margin-top:12px;border:1px solid #3a3c49;border-radius:10px;background:#171820;overflow:hidden}.asset-report summary{padding:11px 12px;cursor:pointer;font-size:13px;font-weight:700;color:#ecebf3}.asset-report[open] summary{border-bottom:1px solid #343541}.asset-report-list{padding:0 12px 8px}.asset-report-item{padding:10px 0;border-bottom:1px solid #30313c}.asset-report-item:last-child{border:0}.asset-report-top{display:flex;gap:8px;align-items:center;justify-content:space-between}.asset-report-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-report-status{flex:none;border-radius:999px;padding:3px 8px;background:#292b36;color:#dedce7;font-size:11px;font-weight:700}.asset-report-status.included{background:#17382c;color:#b8f2ce}.asset-report-status.failed{background:#3b2927;color:#ffc9bb}.asset-report-status.skipped{background:#35313f;color:#ddd0ff}.asset-report-path,.asset-report-url{overflow-wrap:anywhere;word-break:break-all}
       .swatch{display:flex;gap:10px;align-items:center;width:100%;padding:8px;background:transparent;border:0;text-align:left;border-radius:8px}
@@ -235,13 +235,72 @@
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
+  function cloneCodeLanguage(name) {
+    const extension = String(name).split("/").pop().split(".").pop().toLowerCase();
+    return ({ html: "HTML", htm: "HTML", css: "CSS", json: "JSON", md: "Markdown", xml: "XML", svg: "SVG", js: "JavaScript", mjs: "JavaScript", csv: "CSV", yml: "YAML", yaml: "YAML" })[extension] || "Text";
+  }
+  function cloneCodeToken(text, kind) { return `<span class="tok-${kind}">${esc(text)}</span>`; }
+  function highlightCloneCodeLine(line, language) {
+    if (language === "Markdown") {
+      if (/^\s{0,3}#{1,6}\s/.test(line)) return cloneCodeToken(line, "heading");
+      return esc(line).replace(/(`[^`]+`|\[[^\]]+\]\([^)]+\)|^\s*(?:[-*+]|\d+\.)\s|^>\s?)/g, (token) => cloneCodeToken(token, token.startsWith("`") ? "inline-code" : "punctuation"));
+    }
+    let pattern;
+    if (["HTML", "XML", "SVG"].includes(language)) pattern = /<!--[\s\S]*?-->|<![^>]*>|<\/?[A-Za-z][\w:-]*|\/?>|[A-Za-z_:][\w:.-]*(?=\s*=)|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|&(?:#\d+|#x[\da-f]+|[A-Za-z][\da-z]+);|=/gi;
+    else if (language === "CSS") pattern = /\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|#[\da-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch|color)\([^)]*\)|@[a-z-]+\b|!\s*important\b|--[\w-]+|-?\b\d*\.?\d+(?:%|px|rem|em|vw|vh|vmin|vmax|s|ms|deg)?\b|[-_a-z][\w-]*(?=\s*:)|[{}\[\]():;,]/gi;
+    else if (language === "JSON") pattern = /"(?:\\.|[^"\\])*"|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?|true|false|null|[{}\[\],:]/gi;
+    else if (language === "JavaScript") pattern = /\/\/.*$|\/\*[\s\S]*?\*\/|`(?:\\.|[^`\\])*`|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|false|finally|for|from|function|if|import|in|instanceof|let|new|null|of|return|static|super|switch|this|throw|true|try|typeof|var|void|while|yield)\b|-?\b\d*\.?\d+(?:e[+-]?\d+)?\b|[A-Za-z_$][\w$]*(?=\s*\()|===|!==|=>|==|!=|<=|>=|\+\+|--|&&|\|\||\?\?|[+\-*\/%=<>!&|?:]|[{}\[\];(),.]/g;
+    else return esc(line);
+
+    let output = "", cursor = 0;
+    for (const match of line.matchAll(pattern)) {
+      const token = match[0], index = match.index;
+      output += esc(line.slice(cursor, index));
+      let kind = "punctuation";
+      if (["HTML", "XML", "SVG"].includes(language)) {
+        if (token.startsWith("<!--")) kind = "comment";
+        else if (token.startsWith("<!")) kind = "meta";
+        else if (token.startsWith("<")) kind = "tag";
+        else if (token.startsWith("\"") || token.startsWith("'")) kind = "string";
+        else if (token.startsWith("&")) kind = "entity";
+        else if (/^[A-Za-z_:]/.test(token)) kind = "attribute";
+      } else if (language === "CSS") {
+        if (token.startsWith("/*")) kind = "comment";
+        else if (token.startsWith("\"") || token.startsWith("'")) kind = "string";
+        else if (token.startsWith("#") || /^(?:rgb|rgba|hsl|hsla|oklch|color)\(/i.test(token)) kind = "color";
+        else if (token.startsWith("@") || /^!\s*important/i.test(token)) kind = "keyword";
+        else if (token.startsWith("--")) kind = "variable";
+        else if (/^-?\d/.test(token)) kind = "number";
+        else if (/^[\w-]+$/.test(token)) kind = "property";
+      } else if (language === "JSON") {
+        if (token.startsWith("\"")) kind = /^\s*:/.test(line.slice(index + token.length)) ? "key" : "string";
+        else if (/^-?\d/.test(token)) kind = "number";
+        else if (/^(?:true|false|null)$/i.test(token)) kind = "keyword";
+      } else if (language === "JavaScript") {
+        if (token.startsWith("//") || token.startsWith("/*")) kind = "comment";
+        else if (token.startsWith("\"") || token.startsWith("'") || token.startsWith("`")) kind = "string";
+        else if (/^-?\d/.test(token)) kind = "number";
+        else if (/^(?:async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|false|finally|for|from|function|if|import|in|instanceof|let|new|null|of|return|static|super|switch|this|throw|true|try|typeof|var|void|while|yield)$/.test(token)) kind = "keyword";
+        else if (/^[A-Za-z_$]/.test(token) && !/^[{}\[\];(),.]$/.test(token)) kind = "function";
+        else if (/^(?:===|!==|=>|==|!=|<=|>=|\+\+|--|&&|\|\||\?\?|[+\-*\/%=<>!&|?:])$/.test(token)) kind = "operator";
+      }
+      output += cloneCodeToken(token, kind);
+      cursor = index + token.length;
+    }
+    return output + esc(line.slice(cursor));
+  }
+  function highlightedCloneCode(source, name) {
+    const language = cloneCodeLanguage(name);
+    return String(source).split("\n").map((line, index) => `<span class="code-line" data-line="${index + 1}">${highlightCloneCodeLine(line, language)}</span>`).join("");
+  }
   function cloneFileMarkup() {
     if (!state.cloneZipFiles.length) return `<div class="hint" style="margin-top:12px">Preview the page or create a ZIP to browse its generated files and contents.</div>`;
     const file = state.cloneZipFiles.find((item) => item.name === state.cloneSelectedFile) || state.cloneZipFiles[0];
     const isText = file.isText;
     const fileLabel = state.clonePackageReady ? "Files in ZIP" : "Generated files preview";
+    const languageLabel = isText ? cloneCodeLanguage(file.name) : "Binary asset";
     const options = state.cloneZipFiles.map((item) => `<option value="${esc(item.name)}" ${item.name === file.name ? "selected" : ""}>${esc(item.name)}</option>`).join("");
-    return `<h2>${fileLabel} · ${state.cloneZipFiles.length}</h2><div class="row"><label class="grow muted">Choose a file<select id="clone-file-select" aria-label="Choose a file from the page export">${options}</select></label><span class="muted">${isText ? "Text/code" : "Binary asset"} · ${cloneFileSizeLabel(cloneFileSize(file))}</span></div><div class="row" style="margin-top:8px"><button data-action="clone-copy-file" ${isText ? "" : "disabled"}>Copy file contents</button><button data-action="clone-save-file">Save ${esc(file.name.split("/").pop())}</button></div>${isText ? `<div class="code-search"><input type="search" id="clone-code-search" aria-label="Find in ${esc(file.name)}" placeholder="Find in ${esc(file.name)}">${button("Find next", "clone-find-code")}</div><div id="clone-file-content"></div><div class="muted" id="clone-code-hint" style="margin-top:5px">Showing the complete text contents written to this ZIP file.</div>` : `<div id="clone-file-binary" class="stack" style="margin-top:9px"></div>`}`;
+    return `<h2>${fileLabel} · ${state.cloneZipFiles.length}</h2><div class="row"><label class="grow muted">Choose a file<select id="clone-file-select" aria-label="Choose a file from the page export">${options}</select></label><span class="muted"><span class="code-language">${esc(languageLabel)}</span> · ${cloneFileSizeLabel(cloneFileSize(file))}${isText ? " · Syntax highlighted" : ""}</span></div><div class="row" style="margin-top:8px"><button data-action="clone-copy-file" ${isText ? "" : "disabled"}>Copy file contents</button><button data-action="clone-save-file">Save ${esc(file.name.split("/").pop())}</button></div>${isText ? `<div class="code-search"><input type="search" id="clone-code-search" aria-label="Find in ${esc(file.name)}" placeholder="Find in ${esc(file.name)}">${button("Find next", "clone-find-code")}</div><div class="code-editor" id="clone-file-content"></div><div class="muted" id="clone-code-hint" style="margin-top:5px">Showing the complete text contents written to this ZIP file. Click Copy file contents for the exact original text.</div>` : `<div id="clone-file-binary" class="stack" style="margin-top:9px"></div>`}`;
   }
   function formatCloneHtml(source) {
     const voidTags = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
@@ -1239,15 +1298,16 @@
       if (cloneFile.isText) {
         const contentSlot = main.querySelector("#clone-file-content");
         if (contentSlot) {
-          const textarea = document.createElement("textarea");
-          textarea.id = "clone-code-source";
-          textarea.className = "code";
-          textarea.readOnly = true;
-          textarea.spellcheck = false;
-          textarea.setAttribute("aria-label", `Full file contents: ${cloneFile.name}`);
-          textarea.style.cssText = "height:260px;max-height:42vh;resize:vertical";
-          textarea.value = cloneFile.content || "";
-          contentSlot.appendChild(textarea);
+          const codeView = document.createElement("pre");
+          codeView.id = "clone-code-source";
+          codeView.className = "code-view";
+          codeView.tabIndex = 0;
+          codeView.setAttribute("role", "region");
+          codeView.setAttribute("aria-label", `Full file contents: ${cloneFile.name}`);
+          const code = document.createElement("code");
+          code.innerHTML = highlightedCloneCode(cloneFile.content || "", cloneFile.name);
+          codeView.appendChild(code);
+          contentSlot.appendChild(codeView);
         }
       } else {
         const binaryPanel = main.querySelector("#clone-file-binary");
@@ -1398,8 +1458,12 @@
       let index = lowerCode.indexOf(lowerQuery, state.cloneCodeFindCursor);
       if (index < 0) index = lowerCode.indexOf(lowerQuery);
       if (index < 0) { setStatus(`No match for “${query}” in ${file?.name || "this file"}.`); return; }
-      source.focus(); source.setSelectionRange(index, index + query.length);
       const line = fullCode.slice(0, index).split("\n").length;
+      source.querySelector(".code-line.active")?.classList.remove("active");
+      const matchLine = source.querySelector(`.code-line[data-line="${line}"]`);
+      matchLine?.classList.add("active");
+      source.focus({ preventScroll: true });
+      matchLine?.scrollIntoView({ block: "center", inline: "nearest" });
       const hint = main.querySelector("#clone-code-hint");
       if (hint) hint.textContent = `Match on line ${line} · search checks the complete ${file?.name || "file"}.`;
       state.cloneCodeFindCursor = index + query.length;
@@ -1572,4 +1636,3 @@
   render();
   loadPreferences();
 })();
-

@@ -5,7 +5,7 @@ PageLens is a Manifest V3 Chrome extension for inspecting page design and collec
 ## Included tools
 
 - Pick an element, preview it safely, and copy or save its HTML and computed CSS
-- Preview a rendered page snapshot, browse the exact contents of every text file in the ZIP (HTML, CSS, JSON, README, and text assets), inspect binary asset previews, search, copy, or save files, and choose which asset categories to include
+- Preview a rendered page snapshot, browse syntax-highlighted, line-numbered contents of every text file in the ZIP (HTML, CSS, JSON, README, and text assets), inspect binary asset previews, search, copy, or save files, and choose which asset categories to include
 - Generate a visual Design MD reference with colors, typography, and spacing, or create an editable, detailed design prompt with page sections, measured layout, controls, responsive rules, goal, audience, and preferred stack
 - Filter and search images, SVGs, video, and CSS backgrounds; copy URLs, save one file, or bundle selected assets
 - Extract a page color palette and typography styles; hover over text to inspect font family, size, weight, and line height
@@ -50,4 +50,3 @@ Some pages cannot be inspected, including browser settings and Chrome Web Store 
 Store listing text, promotional artwork, and a release checklist are in the repository root. The downloadable ZIP contains only the extension files, with `manifest.json` at its root.
 
 Swap Fonts retrieves the full Google Fonts family list from the upstream catalog and lets you apply a family to the whole page, headings, body text, or a selected element.
-
