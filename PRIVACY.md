@@ -10,7 +10,7 @@ After you click the PageLens toolbar button, the extension reads information fro
 
 ## Local processing and downloads
 
-PageLens processes page information in your browser. It does not transmit page content, page addresses, screenshots, or generated notes to a PageLens server. PageLens has no account service, analytics, advertising, or remote storage, and it does not retain page data after the tab session ends. Toolbar position, tool order, capture defaults, and Clone Page inclusion choices for images/assets, fonts, and media are saved in Chrome's local extension storage.
+PageLens processes page information in your browser. It does not transmit page content, page addresses, screenshots, reference overlays, or generated notes to a PageLens server. PageLens has no account service, analytics, advertising, or remote storage, and it does not retain page data after the tab session ends. Toolbar position, tool order and visibility, capture defaults, responsive widths and scroll preference, overlay opacity, and Clone Page inclusion choices for images/assets, fonts, and media are saved in Chrome's local extension storage. A screenshot selected for responsive overlay stays in the current tab and is not saved by PageLens.
 
 When you choose an export, screenshot, or asset download, PageLens asks Chrome to save the requested file to your device. Clone Page can fetch up to 45 selected page assets for the ZIP, with per-file and total size limits. You can turn image/assets, fonts, and video/audio inclusion on or off independently. The asset collection tool can bundle up to 40 selected files, with a 1.5 MB per-file limit and an 8 MB total limit. The browser requests those files directly from their source hosts; cross-origin restrictions may prevent a file from being included. Those requests are handled by your browser and the asset hosts, not by a PageLens server.
 
@@ -25,4 +25,3 @@ PageLens starts only after you click its toolbar button. You can close the tab t
 ## Changes and contact
 
 If PageLens's data practices change, this policy will be updated before those changes are introduced. For questions or support, use the [PageLens GitHub issue tracker](https://github.com/xorudra/pagelens/issues).
-

@@ -134,6 +134,7 @@
       .device-title{margin-bottom:7px;color:#dddce7;font-size:12px;font-weight:700}
       .device-window{position:relative;overflow:hidden;background:white;border-radius:4px;box-shadow:0 5px 18px #0006}
       .device-window iframe{position:absolute;left:0;top:0;transform-origin:top left;border-radius:0}
+      .responsive-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;z-index:2}
       .editor-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
       .editor-stage{max-height:360px;overflow:auto;padding:8px;background:#0d0e12;border:1px solid #393a46;border-radius:10px;text-align:center}
       .editor-stage canvas{display:block;max-width:100%;height:auto;margin:0 auto;touch-action:none;cursor:crosshair}
@@ -142,15 +143,20 @@
       iframe{border:0;background:white;border-radius:3px;transform-origin:top center;box-shadow:0 8px 30px #0007}
       #footer{display:none;flex:none;border-top:1px solid var(--pl-line);padding:9px 15px;align-items:center;gap:8px;color:#b2b5c2;font-size:12px;font-weight:500;line-height:1.4;background:#15161d}
       #panel.expanded #footer{display:flex}
+      #restore-minimized{display:none;width:38px;height:42px;padding:0;margin:auto;border-radius:12px;background:linear-gradient(135deg,#b58cff,#6ecbdb);color:#111218;font-weight:900}
+      #panel.minimized{left:auto;right:12px;top:50%;bottom:auto;transform:translateY(-50%);width:52px;height:60px;min-height:60px;max-height:none;border-radius:15px}
+      #panel.minimized header,#panel.minimized #body,#panel.minimized #footer{display:none!important}
+      #panel.minimized #restore-minimized{display:block}
       #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#202635;color:#f5f7fb;border:1px solid #414b60;padding:8px 12px;border-radius:9px;box-shadow:0 6px 24px #0008;display:none;pointer-events:none}
       .welcome{padding-top:2px}.feature{font-size:13px;font-weight:600;line-height:1.45;color:#dedee7;padding:9px 0;border-bottom:1px solid #30313c}.feature:last-child{border:0}
       @media(max-width:640px){#panel{width:calc(100vw - 16px);bottom:8px;border-radius:16px}#panel.expanded{max-height:calc(100vh - 16px)}#panel.sidebar{left:8px;right:8px;top:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px)}#panel.sidebar:not(.expanded){left:auto;right:8px;top:50%;bottom:auto;transform:translateY(-50%);width:72px;height:auto;max-height:calc(100vh - 16px)}header{height:50px;padding:0 12px}nav{padding:8px}.navbtn{width:74px;height:60px;flex-basis:74px;font-size:11px}main{padding:16px 15px 18px;max-height:calc(100vh - 190px)}.kv{grid-template-columns:95px minmax(0,1fr)}#panel.sidebar nav{width:72px;flex-basis:72px;padding:6px 4px}.compare-wrap{grid-template-columns:1fr 1fr;padding:8px;gap:8px}}
     </style>
     <div id="highlight"></div>
     <section id="panel" role="dialog" aria-label="PageLens website toolkit">
-      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="settings" title="Workspace settings" aria-label="Workspace settings">⚙</button><button class="subtle" data-action="close" title="Back to tools">⌄</button></header>
+      <header><div class="brand"><div class="logo">P</div>PageLens</div><button class="subtle" data-action="settings" title="Workspace settings" aria-label="Workspace settings">⚙</button><button class="subtle" data-action="minimize" title="Minimize to page edge" aria-label="Minimize PageLens to page edge">—</button><button class="subtle" data-action="close" title="Back to tools">⌄</button></header>
       <div id="body"><nav id="nav"></nav><main id="main"></main></div>
       <div id="footer"><span class="grow">Local page tools · Changes are temporary</span><button class="subtle" data-action="undo">Undo</button></div>
+      <button id="restore-minimized" data-action="restore" title="Restore PageLens" aria-label="Restore PageLens">P</button>
     </section>
     <div id="toast" role="status"></div>
   `;
@@ -160,8 +166,8 @@
   const nav = shadow.getElementById("nav");
   const highlight = shadow.getElementById("highlight");
   const toast = shadow.getElementById("toast");
-  const defaultPreferences = { dock: "bottom", captureMode: "visible", responsiveWidths: [375, 768, 1280], toolOrder: tools.map((item) => item[0]), cloneIncludes: { assets: true, fonts: true, media: true } };
-  const state = { tool: null, selected: null, picking: false, measuring: false, fontInspecting: false, firstPoint: null, history: [], fontStyle: null, fontLink: null, fontCatalog: null, fontCatalogLoading: false, fontCatalogLoaded: false, responsiveFrames: [], screenshotCanvas: null, originalScreenshot: null, editorMode: "view", editorHistory: [], editorRedo: [], annotationColor: "#ff4d8d", annotationText: "Note", captureCancel: false, capturing: false, assets: null, selectedAssets: new Set(), clonePreviewHtml: "", clonePreviewCss: "", cloneZipFiles: [], cloneSelectedFile: "index.html", clonePackageReady: false, clonePreviewObjectUrl: "", cloneCodeFindCursor: 0, cloneAssetReport: null, promptInputs: { goal: "", audience: "", framework: "" }, promptDraft: "", preferences: { ...defaultPreferences } };
+  const defaultPreferences = { dock: "bottom", captureMode: "visible", responsiveWidths: [375, 768, 1280], responsiveSyncScroll: false, responsiveOverlayOpacity: 50, hiddenTools: [], toolOrder: tools.map((item) => item[0]), cloneIncludes: { assets: true, fonts: true, media: true } };
+  const state = { tool: null, minimized: false, selected: null, picking: false, measuring: false, fontInspecting: false, firstPoint: null, history: [], fontStyle: null, fontLink: null, fontCatalog: null, fontCatalogLoading: false, fontCatalogLoaded: false, responsiveFrames: [], responsiveBoundFrames: new WeakMap(), responsiveSyncing: false, responsiveOverlayUrl: "", responsiveOverlayEnabled: false, screenshotCanvas: null, originalScreenshot: null, editorMode: "view", editorHistory: [], editorRedo: [], annotationColor: "#ff4d8d", annotationText: "Note", captureCancel: false, capturing: false, assets: null, selectedAssets: new Set(), clonePreviewHtml: "", clonePreviewCss: "", cloneZipFiles: [], cloneSelectedFile: "index.html", clonePackageReady: false, clonePreviewObjectUrl: "", cloneCodeFindCursor: 0, cloneAssetReport: null, promptInputs: { goal: "", audience: "", framework: "" }, promptDraft: "", preferences: { ...defaultPreferences } };
   const icons = [
     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M10 8l6 7-3 .2 1.2 3.3-1.8.7-1.3-3.3-2 2z"/></svg>`,
     `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="1.5"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>`,
@@ -350,7 +356,7 @@
   function navMarkup() {
     const ordered = state.preferences.toolOrder.map((id) => tools.find((item) => item[0] === id)).filter(Boolean);
     tools.filter((item) => !ordered.includes(item)).forEach((item) => ordered.push(item));
-    nav.innerHTML = ordered.map((item) => {
+    nav.innerHTML = ordered.filter((item) => !state.preferences.hiddenTools.includes(item[0])).map((item) => {
       const iconIndex = tools.indexOf(item);
       return `<button class="navbtn ${state.tool === item[0] ? "active" : ""}" data-tool="${item[0]}" title="${esc(item[1])}" aria-label="${esc(item[1])}"><span class="tool-icon">${icons[iconIndex]}</span><span class="tool-label">${esc(item[3] || item[1])}</span></button>`;
     }).join("");
@@ -389,6 +395,9 @@
               media: typeof saved.cloneIncludes?.media === "boolean" ? saved.cloneIncludes.media : true
             },
             responsiveWidths: Array.isArray(saved.responsiveWidths) ? [...new Set(saved.responsiveWidths.map(Number).filter((width) => Number.isInteger(width) && width >= 280 && width <= 2560))] : defaultPreferences.responsiveWidths,
+            responsiveSyncScroll: saved.responsiveSyncScroll === true,
+            responsiveOverlayOpacity: Number.isInteger(saved.responsiveOverlayOpacity) ? Math.min(90, Math.max(0, saved.responsiveOverlayOpacity)) : defaultPreferences.responsiveOverlayOpacity,
+            hiddenTools: Array.isArray(saved.hiddenTools) ? [...new Set(saved.hiddenTools.filter((id) => tools.some((item) => item[0] === id)))].slice(0, Math.max(0, tools.length - 1)) : defaultPreferences.hiddenTools,
             toolOrder: Array.isArray(saved.toolOrder) ? [...new Set(saved.toolOrder.filter((id) => tools.some((item) => item[0] === id))), ...tools.map((item) => item[0]).filter((id) => !saved.toolOrder.includes(id))] : defaultPreferences.toolOrder
           };
           render();
@@ -1153,6 +1162,37 @@
     } catch (error) { setStatus(error.message || "Could not capture this responsive preview."); }
     finally { delete host.dataset.pagelensCapturing; window.scrollTo(oldX, oldY); }
   }
+  function bindResponsiveScrollSync(iframe) {
+    if (!iframe) return;
+    try {
+      const frameWindow = iframe.contentWindow, frameDocument = iframe.contentDocument;
+      if (!frameWindow || !frameDocument || frameDocument.location.origin !== location.origin) return;
+      if (state.responsiveBoundFrames.get(iframe) === frameDocument) return;
+      state.responsiveBoundFrames.set(iframe, frameDocument);
+      frameWindow.addEventListener("scroll", () => {
+        if (!state.preferences.responsiveSyncScroll || state.responsiveSyncing) return;
+        const sourceRoot = frameDocument.scrollingElement || frameDocument.documentElement;
+        const sourceMax = Math.max(0, sourceRoot.scrollHeight - frameWindow.innerHeight);
+        if (sourceMax <= 0) return;
+        const ratio = Math.min(1, Math.max(0, frameWindow.scrollY / sourceMax));
+        state.responsiveSyncing = true;
+        for (const peer of state.responsiveFrames) {
+          const peerFrame = peer.querySelector("iframe");
+          if (!peerFrame || peerFrame === iframe) continue;
+          try {
+            const peerWindow = peerFrame.contentWindow, peerDocument = peerFrame.contentDocument;
+            if (!peerWindow || !peerDocument || peerDocument.location.origin !== location.origin) continue;
+            const peerRoot = peerDocument.scrollingElement || peerDocument.documentElement;
+            const peerMax = Math.max(0, peerRoot.scrollHeight - peerWindow.innerHeight);
+            peerWindow.scrollTo(0, Math.round(peerMax * ratio));
+          } catch (_) {}
+        }
+        requestAnimationFrame(() => { state.responsiveSyncing = false; });
+      }, { passive: true });
+    } catch (_) {
+      // Cross-origin and frame-blocked pages cannot expose their scroll position.
+    }
+  }
   function drawArrow(ctx, from, to, color, width) {
     const angle = Math.atan2(to.y - from.y, to.x - from.x), head = Math.max(12, width * 4);
     ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y);
@@ -1265,6 +1305,7 @@
     if (state.clonePreviewObjectUrl) { URL.revokeObjectURL(state.clonePreviewObjectUrl); state.clonePreviewObjectUrl = ""; }
     navMarkup();
     panel.classList.toggle("expanded", Boolean(state.tool));
+    panel.classList.toggle("minimized", state.minimized);
     if (!state.tool) { main.innerHTML = ""; return; }
     const info = currentInfo();
     const selected = info ? selectedCard() : "";
@@ -1285,8 +1326,8 @@
       inspect: `<h1>Inspect & measure</h1><p>Pick an element to read its box size, spacing, and computed styles.</p>${button("Pick element", "pick", true)}${selected || ""}${info ? `<div class="card">${kv("Position", `${Math.round(info.rect.left)}, ${Math.round(info.rect.top)} px`)}${kv("Margin", info.style.margin)}${kv("Padding", info.style.padding)}${kv("Border", info.style.border)}${kv("Display", info.style.display)}${kv("Positioning", info.style.position)}</div>` : ""}<h2>Measure distance</h2><p>Click two points in the page to calculate the straight-line distance.</p>${button("Start measuring", "measure")}${state.firstPoint ? `<div class="hint" style="margin-top:8px">First point: ${Math.round(state.firstPoint.x)}, ${Math.round(state.firstPoint.y)} px</div>` : ""}<div class="status"></div>`,
       "edit-text": `<h1>Edit text</h1><p>Select a text element and try a copy change in place.</p>${button("Pick text", "pick", true)}${selected || ""}${info ? `<h2>Preview copy</h2><textarea id="edit-value">${esc(info.el.innerText || "")}</textarea><div class="row">${button("Apply to page", "apply-text", true)}${button("Undo edit", "undo")}</div>` : ""}<div class="hint" style="margin-top:12px">This edits the current rendered page only. Reload the tab to restore the original text.</div><div class="status"></div>`,
       screenshot: `<h1>Screenshot</h1><p>Capture the visible area or stitch a long page, then crop, annotate, and export the result.</p><div class="card">${kv("Viewport", `${innerWidth} × ${innerHeight} px`)}${kv("Page", location.hostname)}</div>${state.capturing ? `<div class="row">${button("Cancel capture", "cancel-capture", false, "danger")}</div>` : `<div class="row">${button("Capture visible", "capture-visible", state.preferences.captureMode === "visible")}${button("Capture full page", "capture-full", state.preferences.captureMode === "full")}${button("Capture area", "capture-area")}${button("Capture element", "capture-element")}</div><div class="row" style="margin-top:8px"><label class="check-row"><input id="capture-lazy" type="checkbox" checked> Wait for lazy content while scrolling</label><label class="muted">Scroll wait <select id="capture-delay"><option value="110">Quick</option><option value="300" selected>Balanced</option><option value="650">Careful</option></select></label></div>`}${state.screenshotCanvas ? `<div class="editor-tools">${button("Crop", "editor-crop", state.editorMode === "crop")}${button("Draw", "editor-draw", state.editorMode === "draw")}${button("Arrow", "editor-arrow", state.editorMode === "arrow")}${button("Rectangle", "editor-rect", state.editorMode === "rect")}${button("Text", "editor-text", state.editorMode === "text")}${button("Blur", "editor-blur", state.editorMode === "blur")}${button("View", "editor-view", state.editorMode === "view")}${button("Undo", "editor-undo")}${button("Redo", "editor-redo")}${button("Reset", "editor-reset")}</div><div class="row"><label class="muted">Annotation color <input id="annotation-color" type="color" value="${esc(state.annotationColor)}" style="width:48px;height:38px;padding:3px"></label><label class="grow muted">Text note <input id="annotation-text" type="text" value="${esc(state.annotationText)}" maxlength="120"></label>${button("Add browser frame", "editor-frame")}${button("Add background", "editor-background")}</div><div class="row" style="margin-top:8px">${button("PNG", "editor-png", true)}${button("JPG", "editor-jpg")}${button("WebP", "editor-webp")}${button("PDF", "editor-pdf")}<span class="muted">Frame color <input id="frame-background" type="color" value="#f1f1f4" style="width:48px;height:34px;padding:3px;vertical-align:middle"></span></div><div id="editor-stage" class="editor-stage"></div><div class="muted" style="margin-top:7px">Drag on the image to crop, draw, add shapes, blur an area, or place a note.</div>` : `<div class="hint" style="margin-top:10px">Full page capture can stitch up to 40 screens. Sticky elements may repeat, and some browser pages cannot be captured.</div>`}<div class="status"></div>`,
-      responsive: `<h1>Responsive viewer</h1><p>Compare phone, foldable, tablet, laptop, and desktop viewport widths side by side.</p><div class="row">${responsiveOptions.map((width) => `<label class="check-row"><input type="checkbox" data-responsive-width value="${width}" ${state.preferences.responsiveWidths.includes(width) ? "checked" : ""}>${[344, 673].includes(width) ? "Foldable · " : width === 280 ? "Small · " : ""}${width}px</label>`).join("")}</div><div class="row" style="margin-top:9px"><input id="custom-width" type="number" min="280" max="2560" step="1" placeholder="Custom width (280–2560 px)" aria-label="Custom viewport width">${button("Add width", "add-responsive-width")}</div><div class="row" style="margin-top:9px"><label class="grow muted">Preview scale <input id="responsive-scale" type="range" min="20" max="100" value="35"></label><span class="muted">35%</span></div><div class="row" style="margin-top:9px">${button("Compare selected sizes", "compare-responsive", true)}${button("Use saved sizes", "use-responsive-sizes")}</div><div id="responsive-grid" class="compare-wrap" style="margin-top:10px">${state.responsiveFrames.length ? "" : `<div class="muted">Select viewport sizes and compare them.</div>`}</div><div class="hint" style="margin-top:10px">A site may block previews in frames. PageLens uses normal browser rendering and does not bypass frame restrictions.</div><div class="status"></div>`,
-      settings: `<h1>Workspace settings</h1><p>Choose where PageLens sits, set capture defaults, and arrange the toolbar.</p><div class="card"><label class="muted" for="dock-choice">Toolbar position</label><select id="dock-choice"><option value="bottom" ${state.preferences.dock === "bottom" ? "selected" : ""}>Bottom dock</option><option value="sidebar" ${state.preferences.dock === "sidebar" ? "selected" : ""}>Right sidebar</option></select><label class="muted" for="capture-default" style="display:block;margin-top:10px">Default screenshot mode</label><select id="capture-default"><option value="visible" ${state.preferences.captureMode === "visible" ? "selected" : ""}>Visible area</option><option value="full" ${state.preferences.captureMode === "full" ? "selected" : ""}>Full page</option></select><h2>Toolbar order</h2><div class="stack">${state.preferences.toolOrder.map((id, index) => { const item = tools.find((tool) => tool[0] === id); return `<div class="row card" style="margin:0;padding:8px 10px"><span class="grow">${esc(item?.[1] || id)}</span><button data-action="move-tool" data-index="${index}" data-direction="up" ${index === 0 ? "disabled" : ""} aria-label="Move up">↑</button><button data-action="move-tool" data-index="${index}" data-direction="down" ${index === state.preferences.toolOrder.length - 1 ? "disabled" : ""} aria-label="Move down">↓</button></div>`; }).join("")}</div><div class="status">Settings save automatically on this browser.</div></div>`,
+      responsive: `<h1>Responsive viewer</h1><p>Compare layouts at phone, tablet, laptop, and desktop widths. Sync scrolling to inspect matching page sections, or add a reference screenshot overlay.</p><div class="row">${responsiveOptions.map((width) => `<label class="check-row"><input type="checkbox" data-responsive-width value="${width}" ${state.preferences.responsiveWidths.includes(width) ? "checked" : ""}>${[344, 673].includes(width) ? "Foldable · " : width === 280 ? "Small · " : ""}${width}px</label>`).join("")}</div><div class="row" style="margin-top:9px"><input id="custom-width" type="number" min="280" max="2560" step="1" placeholder="Custom width (280–2560 px)" aria-label="Custom viewport width">${button("Add width", "add-responsive-width")}</div><div class="row" style="margin-top:9px"><label class="grow muted">Preview scale <input id="responsive-scale" type="range" min="20" max="100" value="35"></label><span class="muted">35%</span></div><div class="row" style="margin-top:9px"><label class="check-row"><input id="responsive-sync-scroll" type="checkbox" ${state.preferences.responsiveSyncScroll ? "checked" : ""}>Sync scrolling</label><label class="check-row"><input id="responsive-overlay-toggle" type="checkbox" ${state.responsiveOverlayEnabled ? "checked" : ""} ${state.responsiveOverlayUrl ? "" : "disabled"}>Show screenshot overlay</label></div><div class="row" style="margin-top:9px"><label class="grow muted">Reference screenshot <input id="responsive-overlay-file" type="file" accept="image/*" aria-label="Choose a reference screenshot"></label><label class="grow muted">Overlay opacity <input id="responsive-overlay-opacity" type="range" min="0" max="90" value="${state.preferences.responsiveOverlayOpacity}"></label><span id="responsive-opacity-value" class="muted">${state.preferences.responsiveOverlayOpacity}%</span></div><div class="row" style="margin-top:9px">${button("Compare selected sizes", "compare-responsive", true)}${button("Use saved sizes", "use-responsive-sizes")}${button("Clear screenshot overlay", "clear-responsive-overlay")}</div><div id="responsive-grid" class="compare-wrap" style="margin-top:10px">${state.responsiveFrames.length ? "" : `<div class="muted">Select viewport sizes and compare them.</div>`}</div><div class="hint" style="margin-top:10px">Sync scrolling works on pages that allow frame access. The screenshot overlay is local to this tab and scales to each preview. Some sites block previews in frames.</div><div class="status"></div>`,
+      settings: `<h1>Workspace settings</h1><p>Choose where PageLens sits, set capture defaults, and arrange the toolbar.</p><div class="card"><label class="muted" for="dock-choice">Toolbar position</label><select id="dock-choice"><option value="bottom" ${state.preferences.dock === "bottom" ? "selected" : ""}>Bottom dock</option><option value="sidebar" ${state.preferences.dock === "sidebar" ? "selected" : ""}>Right sidebar</option></select><label class="muted" for="capture-default" style="display:block;margin-top:10px">Default screenshot mode</label><select id="capture-default"><option value="visible" ${state.preferences.captureMode === "visible" ? "selected" : ""}>Visible area</option><option value="full" ${state.preferences.captureMode === "full" ? "selected" : ""}>Full page</option></select><h2>Show tools</h2><p>Hide tools you do not use. At least one tool stays available on the toolbar.</p><div class="stack">${tools.map((item) => { const visible = !state.preferences.hiddenTools.includes(item[0]); return `<label class="check-row"><input type="checkbox" data-tool-visibility value="${item[0]}" ${visible ? "checked" : ""} ${visible && tools.length - state.preferences.hiddenTools.length <= 1 ? "disabled" : ""}>${esc(item[1])}</label>`; }).join("")}</div><h2>Toolbar order</h2><div class="stack">${state.preferences.toolOrder.map((id, index) => { const item = tools.find((tool) => tool[0] === id); return `<div class="row card" style="margin:0;padding:8px 10px"><span class="grow">${esc(item?.[1] || id)}</span><button data-action="move-tool" data-index="${index}" data-direction="up" ${index === 0 ? "disabled" : ""} aria-label="Move up">↑</button><button data-action="move-tool" data-index="${index}" data-direction="down" ${index === state.preferences.toolOrder.length - 1 ? "disabled" : ""} aria-label="Move down">↓</button></div>`; }).join("")}</div><div class="status">Settings save automatically on this browser.</div></div>`,
       layout: `<h1>Move & delete</h1><p>Select an element, then move it before or after a sibling or remove it.</p>${button("Pick element", "pick", true)}${selected || ""}${info ? `<div class="stack" style="margin-top:9px">${button("Move earlier", "move-up")}${button("Move later", "move-down")}${button("Remove element", "remove", false, "danger")}</div>` : ""}<div class="hint" style="margin-top:12px">Changes affect this tab only. Use Undo below or reload the page to restore its original layout.</div><div class="status"></div>`
     };
     main.innerHTML = pages[state.tool] || "";
@@ -1346,6 +1387,18 @@
       const grid = main.querySelector("#responsive-grid");
       if (grid) {
         grid.replaceChildren(...state.responsiveFrames);
+        for (const card of state.responsiveFrames) {
+          const deviceWindow = card.querySelector(".device-window");
+          deviceWindow?.querySelector(".responsive-overlay")?.remove();
+          if (deviceWindow && state.responsiveOverlayEnabled && state.responsiveOverlayUrl) {
+            const overlay = document.createElement("img");
+            overlay.className = "responsive-overlay";
+            overlay.src = state.responsiveOverlayUrl;
+            overlay.alt = "";
+            overlay.style.opacity = String(state.preferences.responsiveOverlayOpacity / 100);
+            deviceWindow.appendChild(overlay);
+          }
+        }
         grid.addEventListener("dragover", (event) => event.preventDefault());
         grid.addEventListener("drop", (event) => {
           event.preventDefault();
@@ -1386,13 +1439,47 @@
   shadow.addEventListener("change", (event) => {
     const target = event.target;
     if (target.id === "clone-file-select") { state.cloneSelectedFile = target.value; state.cloneCodeFindCursor = 0; render(); return; }
+    if (target.matches("[data-tool-visibility]")) {
+      const hidden = new Set(state.preferences.hiddenTools);
+      if (target.checked) hidden.delete(target.value); else hidden.add(target.value);
+      state.preferences.hiddenTools = [...hidden].slice(0, Math.max(0, tools.length - 1));
+      savePreferences(); render(); return;
+    }
     if (target.id === "prompt-framework") state.promptInputs.framework = target.value;
     if (target.id === "dock-choice") state.preferences.dock = target.value;
     if (target.id === "capture-default") state.preferences.captureMode = target.value;
+    if (target.id === "responsive-sync-scroll") {
+      state.preferences.responsiveSyncScroll = target.checked;
+      if (target.checked && !state.responsiveFrames.length) setStatus("Compare viewport sizes first; scrolling will then stay in sync where the page allows it.");
+      else if (target.checked) setStatus("Scroll inside a preview to synchronize the other same-origin previews.");
+    }
+    if (target.id === "responsive-overlay-toggle") {
+      state.responsiveOverlayEnabled = target.checked;
+      render();
+      return;
+    }
+    if (target.id === "responsive-overlay-file") {
+      const file = target.files?.[0];
+      if (!file) return;
+      if (file.type && !file.type.startsWith("image/")) { setStatus("Choose an image file for the screenshot overlay."); return; }
+      if (state.responsiveOverlayUrl) URL.revokeObjectURL(state.responsiveOverlayUrl);
+      state.responsiveOverlayUrl = URL.createObjectURL(file);
+      state.responsiveOverlayEnabled = true;
+      render();
+      setStatus("Reference image loaded. Adjust opacity to compare it with the responsive previews.");
+      return;
+    }
     const cloneIncludeKey = { "clone-include-assets": "assets", "clone-include-fonts": "fonts", "clone-include-media": "media" }[target.id];
     if (cloneIncludeKey) state.preferences.cloneIncludes[cloneIncludeKey] = target.checked;
     if (target.id === "annotation-color") state.annotationColor = target.value;
     if (target.id === "annotation-text") state.annotationText = target.value;
+    if (target.id === "responsive-overlay-opacity") {
+      state.preferences.responsiveOverlayOpacity = Math.min(90, Math.max(0, Number(target.value) || 0));
+      for (const overlay of main.querySelectorAll(".responsive-overlay")) overlay.style.opacity = String(state.preferences.responsiveOverlayOpacity / 100);
+      const label = main.querySelector("#responsive-opacity-value");
+      if (label) label.textContent = `${state.preferences.responsiveOverlayOpacity}%`;
+      savePreferences();
+    }
     if (target.matches("[data-responsive-width]")) {
       const checked = [...main.querySelectorAll("[data-responsive-width]:checked")].map((input) => Number(input.value));
       state.preferences.responsiveWidths = checked;
@@ -1416,13 +1503,22 @@
     if (target.id === "prompt-text") { state.promptDraft = target.value; return; }
     if (target.id === "annotation-color") state.annotationColor = target.value;
     if (target.id === "annotation-text") state.annotationText = target.value;
+    if (target.id === "responsive-overlay-opacity") {
+      state.preferences.responsiveOverlayOpacity = Math.min(90, Math.max(0, Number(target.value) || 0));
+      for (const overlay of main.querySelectorAll(".responsive-overlay")) overlay.style.opacity = String(state.preferences.responsiveOverlayOpacity / 100);
+      const label = main.querySelector("#responsive-opacity-value");
+      if (label) label.textContent = `${state.preferences.responsiveOverlayOpacity}%`;
+      savePreferences();
+    }
     if (target.id === "responsive-scale") { const label = target.parentElement?.nextElementSibling; if (label) label.textContent = `${target.value}%`; }
   });
   shadow.addEventListener("click", async (event) => {
     const actionButton = event.target.closest("[data-action]");
     if (!actionButton) return;
     const action = actionButton.dataset.action;
-    if (action === "close") { state.tool = null; state.fontInspecting = false; highlight.removeAttribute("data-font-tip"); finishPick(); render(); return; }
+    if (action === "minimize") { state.minimized = true; render(); return; }
+    if (action === "restore") { state.minimized = false; render(); return; }
+    if (action === "close") { state.tool = null; state.minimized = false; state.fontInspecting = false; highlight.removeAttribute("data-font-tip"); finishPick(); render(); return; }
     if (action === "settings") { state.tool = "settings"; render(); return; }
     if (action === "move-tool") {
       const from = Number(actionButton.dataset.index), to = from + (actionButton.dataset.direction === "up" ? -1 : 1);
@@ -1552,6 +1648,11 @@
     if (action === "editor-jpg" && state.screenshotCanvas) { exportEditorImage("image/jpeg"); return; }
     if (action === "editor-webp" && state.screenshotCanvas) { exportEditorImage("image/webp"); return; }
     if (action === "editor-pdf" && state.screenshotCanvas) { await exportEditorPdf(); return; }
+    if (action === "clear-responsive-overlay") {
+      if (state.responsiveOverlayUrl) URL.revokeObjectURL(state.responsiveOverlayUrl);
+      state.responsiveOverlayUrl = ""; state.responsiveOverlayEnabled = false;
+      render(); setStatus("Reference screenshot overlay cleared."); return;
+    }
     if (action === "compare-responsive" || action === "use-responsive-sizes") {
       const widths = action === "use-responsive-sizes" ? state.preferences.responsiveWidths : [...main.querySelectorAll("[data-responsive-width]:checked")].map((input) => Number(input.value));
       if (!widths.length) { setStatus("Choose at least one viewport size."); return; }
@@ -1561,6 +1662,8 @@
         const scale = Math.min(1, requestedScale, 480 / width), height = 720;
         const device = [344, 673].includes(width) ? "Foldable" : width <= 300 ? "Small phone" : width < 500 ? "Phone" : width < 900 ? "Tablet" : width < 1300 ? "Laptop" : "Desktop";
         card.innerHTML = `<div class="device-title">${device} · ${width}px</div><div class="device-window" style="width:${Math.round(width * scale)}px;height:${Math.round(height * scale)}px"><iframe title="${width}px responsive preview" style="width:${width}px;height:${height}px;transform:scale(${scale})" src="${esc(location.href)}"></iframe></div><div class="row" style="margin-top:7px">${button("Capture reference", "capture-device", false)}<span class="muted">Drag to arrange</span></div>`;
+        const responsiveFrame = card.querySelector("iframe");
+        responsiveFrame?.addEventListener("load", () => bindResponsiveScrollSync(responsiveFrame));
         return card;
       });
       render(); notify("Responsive comparison loaded where the site allows framing."); return;

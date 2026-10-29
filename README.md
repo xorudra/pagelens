@@ -16,10 +16,10 @@ PageLens is a Manifest V3 Chrome extension for inspecting page design and collec
 - Preview text edits, reorder or remove elements, and undo recent page edits
 - Capture visible, full-page, selected-area, or selected-element screenshots; wait for lazy content, cancel a long capture, crop, annotate, blur, and add a frame or background
 - Export captures as PNG, JPG, WebP, or PDF
-- Compare responsive previews at built-in or custom widths; arrange previews, adjust their scale, and save a viewport reference image
-- Choose a bottom dock or right sidebar, reorder tools, and save capture and viewport defaults
+- Compare responsive previews at built-in or custom widths; arrange previews, sync scrolling, compare against a local screenshot overlay, adjust scale, and save viewport references
+- Choose a bottom dock or right sidebar, hide and reorder tools, minimize the panel to the page edge, and save capture and viewport defaults
 
-PageLens processes page information in your browser. It does not send page content, URLs, screenshots, or generated notes to a PageLens server. Swap Fonts loads the public Google Fonts family list from Google's fonts repository when opened; applying a font requests it from Google Fonts. Clone Page lets you independently choose whether images/assets, fonts, and video/audio are copied into its ZIP. Selected files are requested directly from their source hosts; cross-origin restrictions and size limits may prevent some from being copied. Clone choices and other preferences are stored locally by Chrome. See the [Privacy Policy](PRIVACY.md).
+PageLens processes page information in your browser. It does not send page content, URLs, screenshots, reference overlays, or generated notes to a PageLens server. A selected overlay image stays in the current tab and is not saved by PageLens. Swap Fonts loads the public Google Fonts family list from Google's fonts repository when opened; applying a font requests it from Google Fonts. Clone Page lets you independently choose whether images/assets, fonts, and video/audio are copied into its ZIP. Selected files are requested directly from their source hosts; cross-origin restrictions and size limits may prevent some from being copied. Clone choices and other preferences are stored locally by Chrome. See the [Privacy Policy](PRIVACY.md).
 
 ## Preview without installing
 
@@ -54,4 +54,3 @@ Some pages cannot be inspected, including browser settings and Chrome Web Store 
 Store listing text, promotional artwork, and a release checklist are in the repository root. The downloadable ZIP contains only the extension files, with `manifest.json` at its root.
 
 Swap Fonts retrieves the full Google Fonts family list from the upstream catalog and lets you apply a family to the whole page, headings, body text, or a selected element.
-
