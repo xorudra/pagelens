@@ -1,0 +1,56 @@
+name: Verify extension package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PageLens
+        uses: actions/checkout@v4
+
+      - name: Verify manifest and ZIP contents
+        run: |
+          python - <<'PY'
+          import json
+          import zipfile
+          from pathlib import Path
+
+          root = Path.cwd()
+          expected = {
+              "manifest.json",
+              "content.js",
+              "background.js",
+              "host.css",
+              "icon16.png",
+              "icon48.png",
+              "icon128.png",
+          }
+
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert manifest.get("manifest_version") == 3, "Expected a Manifest V3 extension"
+          assert manifest.get("name") == "PageLens", "Unexpected extension name"
+          assert (root / manifest["background"]["service_worker"]).is_file(), "Service worker is missing"
+          for icon in manifest.get("icons", {}).values():
+              assert (root / icon).is_file(), f"Manifest icon is missing: {icon}"
+
+          with zipfile.ZipFile(root / "pagelens.zip") as package:
+              names = package.namelist()
+              assert len(names) == len(set(names)), "ZIP contains duplicate paths"
+              assert set(names) == expected, f"Unexpected ZIP files: {sorted(names)}"
+              for name in sorted(expected):
+                  assert package.read(name) == (root / name).read_bytes(), f"ZIP is out of sync: {name}"
+
+          host_css = (root / "host.css").read_text(encoding="utf-8")
+          assert "font-family:" in host_css and "!important" in host_css, "Host typography reset is missing"
+          print(f"PageLens package verified: {len(expected)} root files match the manifest and source files.")
+          PY
+
