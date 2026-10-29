@@ -41,11 +41,11 @@ For picture-led steps and common fixes, use the [PageLens installation guide](ht
 1. [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip) and extract the ZIP.
 2. In Chrome, open `chrome://extensions`, turn on **Developer mode**, then choose **Load unpacked**.
 3. Select the extracted PageLens folder whose top level contains `manifest.json`. The folder picker selects a folder, so `manifest.json` will not appear as a selectable file; select that folder and click **Select Folder**.
-4. Open a website and click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
+4. Confirm PageLens appears on the extensions page with its switch on. Open a regular website, refresh it once, then click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
 
 To update an existing installation, either replace the files in the same extracted folder Chrome already loads and click **Reload**, or remove PageLens and load the newly extracted folder. Clicking **Reload** without replacing the files will keep using the old folder.
 
-If the page says **Upload package**, choose the ZIP file instead of a folder.
+If you are in the Chrome Web Store developer dashboard and choose **Upload package**, select `pagelens.zip`. That is for publishing; it is not part of local installation. For local use, choose **Load unpacked** and select the extracted folder.
 
 Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Full-page capture is limited to 40 screens and may repeat sticky elements. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and only the selected image/assets, fonts, and media that the browser can fetch. Unselected or blocked files stay linked to their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.
 
