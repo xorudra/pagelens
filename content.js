@@ -1419,13 +1419,13 @@
     if (target.id === "responsive-scale") { const label = target.parentElement?.nextElementSibling; if (label) label.textContent = `${target.value}%`; }
   });
   shadow.addEventListener("click", async (event) => {
-    const button = event.target.closest("[data-action]");
-    if (!button) return;
-    const action = button.dataset.action;
+    const actionButton = event.target.closest("[data-action]");
+    if (!actionButton) return;
+    const action = actionButton.dataset.action;
     if (action === "close") { state.tool = null; state.fontInspecting = false; highlight.removeAttribute("data-font-tip"); finishPick(); render(); return; }
     if (action === "settings") { state.tool = "settings"; render(); return; }
     if (action === "move-tool") {
-      const from = Number(button.dataset.index), to = from + (button.dataset.direction === "up" ? -1 : 1);
+      const from = Number(actionButton.dataset.index), to = from + (actionButton.dataset.direction === "up" ? -1 : 1);
       if (to >= 0 && to < state.preferences.toolOrder.length) {
         const order = [...state.preferences.toolOrder]; [order[from], order[to]] = [order[to], order[from]]; state.preferences.toolOrder = order; savePreferences(); render();
       }
@@ -1490,18 +1490,18 @@
     if (action === "copy-css" && state.selected) return copy(computedFor(state.selected));
     if (action === "save-html" && state.selected) { downloadText(state.selected.outerHTML, `${safeFilename(selectorFor(state.selected))}.html`, "text/html"); notify("HTML snippet saved."); return; }
     if (action === "save-css" && state.selected) { downloadText(computedFor(state.selected), `${safeFilename(selectorFor(state.selected))}.css`, "text/css"); notify("CSS snippet saved."); return; }
-    if (action === "copy-color") return copy(button.dataset.color);
+    if (action === "copy-color") return copy(actionButton.dataset.color);
     if (action === "copy-palette") return copy(`:root {\n${scanColors().slice(0, 30).map((c, i) => `  --page-color-${i + 1}: ${c.color};`).join("\n")}\n}`);
     if (action === "export-palette") { downloadText(JSON.stringify(scanColors(), null, 2), `${safeFilename(document.title)}-colors.json`, "application/json"); notify("Palette exported."); return; }
     if (action === "refresh-assets") { state.assets = scanAssets(); state.selectedAssets.clear(); main.querySelector("#assets-list").innerHTML = assetsList(filteredAssets()); notify(`${state.assets.length} assets found.`); return; }
     if (action === "copy-asset-urls") { const urls = filteredAssets().map((asset) => asset.url); if (urls.length) return copy(urls.join("\n")); setStatus("No matching asset URLs to copy."); return; }
     if (action === "download-assets-zip") { const selected = (state.assets || []).filter((asset) => state.selectedAssets.has(asset.url)); await downloadAssetsZip(selected); return; }
     if (action === "download-visible-assets") { await downloadAssetsZip(filteredAssets()); return; }
-    if (action === "copy-asset-url") { const asset = (state.assets || [])[Number(button.dataset.index)]; if (asset) return copy(asset.url); return; }
+    if (action === "copy-asset-url") { const asset = (state.assets || [])[Number(actionButton.dataset.index)]; if (asset) return copy(asset.url); return; }
     if (action === "download-asset") {
-      const asset = (state.assets || scanAssets())[Number(button.dataset.index)];
+      const asset = (state.assets || scanAssets())[Number(actionButton.dataset.index)];
       if (!asset) return;
-      if (asset.url.startsWith("data:")) { const a = document.createElement("a"); a.href = asset.url; a.download = `pagelens-asset-${button.dataset.index}.svg`; a.click(); }
+      if (asset.url.startsWith("data:")) { const a = document.createElement("a"); a.href = asset.url; a.download = `pagelens-asset-${actionButton.dataset.index}.svg`; a.click(); }
       else chrome.runtime.sendMessage({ type: "pagelens:download-url", url: asset.url, filename: `pagelens-${safeFilename(asset.alt || "asset")}` }, (response) => notify(response?.ok ? "Download started." : "Could not download this asset."));
       return;
     }
@@ -1565,7 +1565,7 @@
       });
       render(); notify("Responsive comparison loaded where the site allows framing."); return;
     }
-    if (action === "capture-device") { await captureResponsiveReference(state.responsiveFrames.indexOf(button.closest(".device-card"))); return; }
+    if (action === "capture-device") { await captureResponsiveReference(state.responsiveFrames.indexOf(actionButton.closest(".device-card"))); return; }
     if (action === "add-responsive-width") {
       const input = main.querySelector("#custom-width"), width = Number(input?.value);
       if (!Number.isInteger(width) || width < 280 || width > 2560) { setStatus("Enter a whole number from 280 to 2560 pixels."); return; }
