@@ -57,6 +57,22 @@
     .tip-icon{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#d9efdf;font-size:13px;font-weight:900}
     .tip strong{display:block;margin-bottom:2px;color:#304f39;font-size:12px}
     .tip p{margin:0;font-size:12px;line-height:1.6}
+    .package-preview{margin-top:13px;padding:12px;border:1px solid #e9e5f0;border-radius:11px;background:#faf9fc}
+    .package-title{display:flex;align-items:center;gap:8px;color:#3e3949;font-size:11px;font-weight:800}
+    .folder-icon{width:19px;height:15px;position:relative;display:inline-block;border-radius:3px;background:#b99be9;flex:none}
+    .folder-icon:before{content:"";position:absolute;top:-3px;left:2px;width:8px;height:5px;border-radius:3px 3px 0 0;background:#b99be9}
+    .file-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:10px}
+    .file-item{display:flex;align-items:center;gap:6px;min-width:0;padding:6px 7px;border:1px solid #ece9f1;border-radius:7px;background:#fff;color:#555361;font:600 10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .file-item:before{content:"";width:7px;height:9px;border:1px solid #aa9bbf;border-radius:2px;flex:none}
+    .file-item.required{border-color:#cfc2eb;background:#f6f1ff;color:#594187}
+    .folder-caption{margin:8px 0 0;color:#74717d;font-size:10px;line-height:1.5}
+    .package-title .muted{margin-left:auto;color:#777480;font-size:10px;font-weight:650}
+    .ready-check{display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:center;margin-top:14px;padding:16px;border:1px solid #d9e9dc;border-radius:14px;background:#f1f8f2}
+    .ready-check .check{width:26px;height:26px;font-size:14px}
+    .ready-check h3{margin:0 0 3px;color:#304f39;font-size:13px;font-weight:800}
+    .ready-check p{margin:0;color:#526356;font-size:11px;line-height:1.55}
+    .ready-check a{color:#4c7655;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap}
+    .ready-check a:hover{text-decoration:underline}
     .help{padding:49px 0 56px;border-top:1px solid #20212410}
     .help-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:36px;align-items:start}
     .help-intro p{max-width:310px;margin:10px 0;color:var(--muted);font-size:13px}
@@ -77,7 +93,7 @@
     #copy-status.show{opacity:1;transform:translate(-50%,0)}
     :focus-visible{outline:3px solid #9c7be3;outline-offset:3px}
     @media(max-width:800px){.hero{grid-template-columns:1fr .8fr;gap:25px;padding:55px 0 43px}.steps{grid-template-columns:repeat(2,1fr)}.section-head{align-items:start;flex-direction:column}.help-grid{grid-template-columns:1fr;gap:17px}}
-    @media(max-width:600px){.shell{width:calc(100% - 30px)}.topbar{height:64px}.top-links{gap:12px;font-size:11px}.hero{grid-template-columns:1fr;padding:43px 0 37px}.hero:before{right:-90px;top:160px;width:280px;height:280px}.intro{font-size:15px}.browser-card{max-width:430px}.steps-wrap,.help{padding:38px 0}.steps{grid-template-columns:1fr}.step{min-height:0}.step-number{margin-bottom:12px}.privacy{align-items:start;flex-direction:column;margin-bottom:38px}footer{flex-direction:column}.section-head h2{font-size:24px}}
+    @media(max-width:600px){.shell{width:calc(100% - 30px)}.topbar{height:64px}.top-links{gap:12px;font-size:11px}.hero{grid-template-columns:1fr;padding:43px 0 37px}.hero:before{right:-90px;top:160px;width:280px;height:280px}.intro{font-size:15px}.browser-card{max-width:430px}.steps-wrap,.help{padding:38px 0}.steps{grid-template-columns:1fr}.step{min-height:0}.step-number{margin-bottom:12px}.ready-check{grid-template-columns:auto 1fr}.ready-check a{grid-column:2}.privacy{align-items:start;flex-direction:column;margin-bottom:38px}footer{flex-direction:column}.section-head h2{font-size:24px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
   </style>
 </head>
@@ -120,19 +136,22 @@
           <article class="step"><div class="step-number">01</div><h3>Download the ZIP</h3><p>Choose <strong>Download PageLens</strong> above. Your browser saves a ZIP file to Downloads.</p></article>
           <article class="step"><div class="step-number">02</div><h3>Extract the folder</h3><p>On Windows, right-click the ZIP and choose <strong>Extract All</strong>. On Mac, double-click it. Keep the extracted folder somewhere you can find again.</p></article>
           <article class="step"><div class="step-number">03</div><h3>Open extensions</h3><p>Open your browser’s extensions page. Turn on <strong>Developer mode</strong>, then choose <strong>Load unpacked</strong>.</p><div class="browser-targets" aria-label="Extension page addresses"><button class="copy-target" type="button" data-copy="chrome://extensions">Chrome · Copy address</button><button class="copy-target" type="button" data-copy="edge://extensions">Edge · Copy address</button><button class="copy-target" type="button" data-copy="brave://extensions">Brave · Copy address</button></div></article>
-          <article class="step"><div class="step-number">04</div><h3>Select the PageLens folder</h3><p>Choose the extracted folder that has <code>manifest.json</code> directly inside it, then click <strong>Select Folder</strong>. Pin PageLens from the puzzle-piece menu if you like.</p></article>
+          <article class="step"><div class="step-number">04</div><h3>Select the PageLens folder</h3><p>Choose the extracted <strong>PageLens folder itself</strong>, then click <strong>Select Folder</strong>. Do not choose the ZIP or an individual file.</p><div class="package-preview" aria-label="Files inside the extracted PageLens folder"><div class="package-title"><span class="folder-icon" aria-hidden="true"></span>PageLens folder <span class="muted">· 7 files</span></div><div class="file-list"><span class="file-item required">manifest.json</span><span class="file-item">content.js</span><span class="file-item">background.js</span><span class="file-item">host.css</span><span class="file-item">icon16.png</span><span class="file-item">icon48.png</span><span class="file-item">icon128.png</span></div><p class="folder-caption"><strong>Check:</strong> <code>manifest.json</code> is inside this folder. Select the folder; the file itself may not appear in the picker.</p></div></article>
         </div>
         <div class="tip"><span class="tip-icon" aria-hidden="true">i</span><div><strong>The folder is what you select—not manifest.json.</strong><p>In the folder picker, <code>manifest.json</code> may not appear as a selectable item. Select the PageLens folder itself. If the ZIP extracted into an extra folder, open folders until you find the one with <code>manifest.json</code> inside.</p></div></div>
+        <div class="ready-check"><span class="check" aria-hidden="true">✓</span><div><h3>Confirm PageLens is ready</h3><p>Its card appears on the extensions page with the switch on. Open a regular website, refresh it once, then click the PageLens toolbar icon.</p></div><a href="preview.html">Preview the tools →</a></div>
       </section>
 
       <section class="help" aria-labelledby="help-title">
         <div class="help-grid">
-          <div class="help-intro"><div class="eyebrow">Quick help</div><h2 id="help-title">A couple of common questions.</h2><p>If something looks different in your browser, these quick fixes usually point you to the right folder or page.</p></div>
+          <div class="help-intro"><div class="eyebrow">Quick help</div><h2 id="help-title">If setup gets stuck.</h2><p>These checks cover the folder picker, browser permissions, and the most common install errors.</p></div>
           <div class="faq">
-            <details><summary>The folder picker looks empty. What should I choose?</summary><p>Choose the extracted PageLens folder; do not try to open or select the manifest file. Use the folder where <code>manifest.json</code> is visible when you view its contents in File Explorer.</p></details>
-            <details><summary>I see “Upload package” instead of “Load unpacked.”</summary><p>For local installation, open the browser’s extensions page, enable Developer mode, and choose <strong>Load unpacked</strong>. “Upload package” is for a store submission and is not the local install step.</p></details>
-            <details><summary>How do I update an existing installation?</summary><p>Either replace the files in the same folder that PageLens already loads from, then click <strong>Reload</strong>, or remove PageLens and load the newly extracted folder. Reloading alone will keep using the old folder.</p></details>
-            <details><summary>Why is a tool unavailable in the live preview?</summary><p>The preview runs PageLens on a sample page. Browser-only screenshot capture and responsive reference capture need the installed extension. Browser settings and store pages block page tools too.</p></details>
+            <details><summary>The folder picker looks empty. What should I choose?</summary><p>First extract the ZIP. In the picker, open the extracted PageLens folder until its contents include <code>manifest.json</code>, then select that folder. The picker selects folders, so it may not show the manifest as a selectable file.</p></details>
+            <details><summary>I see “Upload package” instead of “Load unpacked.”</summary><p>You are in the Chrome Web Store publisher dashboard. For a local install, open <code>chrome://extensions</code>, turn on <strong>Developer mode</strong>, and use <strong>Load unpacked</strong>. Store upload is a separate publishing step.</p></details>
+            <details><summary>I selected the folder, but PageLens did not appear.</summary><p>Check that you selected the folder containing <code>manifest.json</code> directly, not its parent or the ZIP. On the extensions page, look for an error message on the PageLens card. If one appears, open it and share the error text so it can be diagnosed.</p></details>
+            <details><summary>The PageLens icon is missing or does not open.</summary><p>On <code>chrome://extensions</code>, confirm PageLens is enabled. Open a regular website and refresh the tab once. To show its icon beside the address bar, open the puzzle-piece menu and pin PageLens.</p></details>
+            <details><summary>How do I update an existing installation?</summary><p>Extract the new ZIP, replace the files in the same folder Chrome already loads, and click <strong>Reload</strong>. Or remove PageLens and load the newly extracted folder. Reloading by itself keeps the old files.</p></details>
+            <details><summary>Why is a tool unavailable on some pages or in the preview?</summary><p>Browser settings and Chrome Web Store pages block extensions from inspecting them. The live preview uses a sample page; screenshot capture and responsive reference capture need the installed extension.</p></details>
           </div>
         </div>
       </section>
