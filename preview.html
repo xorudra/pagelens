@@ -16,7 +16,7 @@
     .preview-bar{position:fixed;z-index:2147483646;left:16px;top:14px;display:flex;align-items:center;gap:11px;max-width:calc(100vw - 420px);padding:8px 12px;border:1px solid #ffffff40;border-radius:12px;background:#15251feF;color:#f5f5ee;box-shadow:0 8px 30px #17231e35;font-size:11px;line-height:1.25;backdrop-filter:blur(12px)}
     .preview-mark{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:linear-gradient(135deg,#9a76ff,#45c6d9);color:#11151a;font-weight:900;font-size:14px;flex:none}
     .preview-copy{min-width:0}.preview-copy strong{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase}.preview-copy span{display:block;margin-top:3px;color:#d0d9d2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .preview-bar button{flex:none;border:1px solid #ffffff45;border-radius:8px;background:#ffffff14;color:#fff;padding:7px 9px;font-size:11px;font-weight:650}.preview-bar button:hover{background:#ffffff25}
+    .preview-bar button,.preview-bar .preview-install{flex:none;display:inline-flex;align-items:center;justify-content:center;border:1px solid #ffffff45;border-radius:8px;background:#ffffff14;color:#fff;padding:7px 9px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap}.preview-bar button:hover,.preview-bar .preview-install:hover{background:#ffffff25}
     .hero-wrap{position:relative;overflow:hidden;background:#dfe6d4;min-height:620px;padding:72px 0 56px}
     .hero-wrap:before{content:"";position:absolute;width:560px;height:560px;border-radius:50%;right:-140px;top:-180px;background:#f0d5a8;opacity:.64}
     .hero-wrap:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:270px;bottom:-150px;background:#b3c3a7;opacity:.62}
@@ -66,6 +66,7 @@
     <div class="preview-mark">P</div>
     <div class="preview-copy"><strong>PageLens · Live Preview</strong><span>Real extension tools, running on this sample page. No install needed.</span></div>
     <button type="button" id="open-tools">Open PageLens</button>
+    <a class="preview-install" href="install.html" target="_blank" rel="noopener">Install guide</a>
   </div>
   <div class="preview-toast" id="preview-toast" role="status"></div>
 
@@ -173,3 +174,4 @@
   </script>
 </body>
 </html>
+
