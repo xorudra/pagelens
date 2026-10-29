@@ -2,7 +2,7 @@
 
 PageLens is a Manifest V3 Chrome extension for inspecting page design and collecting references from the current tab. Click the toolbar button to open its tools; PageLens does not run on a page until you invoke it.
 
-**[Open the live preview](https://xorudra.github.io/pagelens/preview.html) · [Simple installation guide](https://xorudra.github.io/pagelens/install.html) · [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip)**
+**[PageLens home](https://xorudra.github.io/pagelens/) · [Open the live preview](https://xorudra.github.io/pagelens/preview.html) · [Simple installation guide](https://xorudra.github.io/pagelens/install.html) · [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip)**
 
 ## Included tools
 
