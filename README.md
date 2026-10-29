@@ -2,6 +2,8 @@
 
 PageLens is a Manifest V3 Chrome extension for inspecting page design and collecting references from the current tab. Click the toolbar button to open its tools; PageLens does not run on a page until you invoke it.
 
+**[Open the live preview](https://xorudra.github.io/pagelens/preview.html) · [Simple installation guide](https://xorudra.github.io/pagelens/install.html) · [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip)**
+
 ## Included tools
 
 - Pick an element, preview it safely, and copy or save its HTML and computed CSS
@@ -34,12 +36,14 @@ Screenshot capture and responsive reference capture require the installed extens
 
 ## Install in Chrome
 
+For picture-led steps and common fixes, use the [PageLens installation guide](https://xorudra.github.io/pagelens/install.html).
+
 1. [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip) and extract the ZIP.
 2. In Chrome, open `chrome://extensions`, turn on **Developer mode**, then choose **Load unpacked**.
 3. Select the extracted PageLens folder whose top level contains `manifest.json`. The folder picker selects a folder, so `manifest.json` will not appear as a selectable file; select that folder and click **Select Folder**.
 4. Open a website and click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
 
-If you already installed an earlier ZIP, download and extract the updated ZIP, then click **Reload** for PageLens on `chrome://extensions` so Chrome uses the fixed files.
+To update an existing installation, either replace the files in the same extracted folder Chrome already loads and click **Reload**, or remove PageLens and load the newly extracted folder. Clicking **Reload** without replacing the files will keep using the old folder.
 
 If the page says **Upload package**, choose the ZIP file instead of a folder.
 
@@ -50,3 +54,4 @@ Some pages cannot be inspected, including browser settings and Chrome Web Store 
 Store listing text, promotional artwork, and a release checklist are in the repository root. The downloadable ZIP contains only the extension files, with `manifest.json` at its root.
 
 Swap Fonts retrieves the full Google Fonts family list from the upstream catalog and lets you apply a family to the whole page, headings, body text, or a selected element.
+
