@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f3">
+  <meta name="description" content="Inspect, compare, and collect useful design details from websites with PageLens browser tools.">
+  <title>PageLens · Website design tools</title>
+  <style>
+    :root{color-scheme:light;--ink:#1e2028;--muted:#656774;--paper:#f7f6f3;--surface:#fff;--line:#e7e5e1;--violet:#7048d1;--violet-dark:#5834b5;--green:#3e6957;--shadow:0 24px 60px #201e3012}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font:500 15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    .shell{width:min(1120px,calc(100% - 44px));margin:0 auto}
+    .nav{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #23232a0d}
+    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-size:16px;font-weight:850;letter-spacing:-.04em}
+    .mark{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,#b996ff,#62d0dc);color:#191622;font-size:17px;font-weight:950;box-shadow:0 5px 14px #7048d128}
+    .nav-links{display:flex;align-items:center;gap:24px;color:#62636e;font-size:12px;font-weight:700}
+    .nav-links a{text-decoration:none}.nav-links a:hover{color:var(--violet)}
+    .nav-links .nav-cta{padding:9px 13px;border:1px solid #ded8ed;border-radius:9px;background:#fff;color:#543796}
+    .hero{position:relative;isolation:isolate;min-height:575px;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;padding:56px 0 62px}
+    .hero:before{content:"";position:absolute;z-index:-1;right:-110px;top:20px;width:620px;height:510px;border-radius:50%;background:radial-gradient(ellipse,#e9e2fa 0,#e9eff0 42%,#f7f6f3 73%);opacity:.82}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#6546ad;font-size:10px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:20px;height:2px;border-radius:2px;background:#9d7ee0}
+    h1{max-width:550px;margin:18px 0 17px;font-size:clamp(48px,6.6vw,76px);line-height:.99;letter-spacing:-.073em;font-weight:850}
+    .hero-copy{max-width:470px;margin:0;color:#646572;font-size:17px;line-height:1.72}
+    .actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px}
+    .button{min-height:47px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 17px;border:1px solid transparent;border-radius:11px;text-decoration:none;font-size:12px;font-weight:780;transition:transform .16s ease,background .16s ease,box-shadow .16s ease}
+    .button:hover{transform:translateY(-1px)}.button-primary{background:var(--violet);color:white;box-shadow:0 8px 20px #7048d12b}.button-primary:hover{background:var(--violet-dark);box-shadow:0 11px 25px #7048d137}.button-secondary{border-color:#dfdce4;background:#ffffffb5;color:#34313d}.button-secondary:hover{background:white}
+    .under-actions{display:flex;align-items:center;gap:8px;margin:14px 0 0;color:#777984;font-size:11px}.green-dot{width:7px;height:7px;border-radius:50%;background:#53aa78;box-shadow:0 0 0 3px #53aa781c}
+    .hero-art{position:relative;min-height:416px;display:grid;place-items:center}
+    .mock-page{position:relative;width:min(100%,470px);height:320px;overflow:hidden;border:1px solid #fff;border-radius:17px;background:#fbfaf7;box-shadow:0 18px 50px #21202d22;transform:rotate(1deg)}
+    .mock-browser{height:31px;display:flex;align-items:center;gap:5px;padding:0 11px;border-bottom:1px solid #eeece8;background:#f1f0ed}.mock-browser i{width:6px;height:6px;border-radius:50%;background:#d0cdd0}.mock-address{width:42%;height:13px;margin-left:7px;border-radius:5px;background:#e4e2e4}
+    .mock-site{height:calc(100% - 31px);padding:20px 21px;background:linear-gradient(135deg,#f5f1e9,#e5ecdf)}
+    .mock-nav{display:flex;justify-content:space-between;align-items:center}.mock-wordmark{font-family:Georgia,serif;font-size:14px;font-weight:700;letter-spacing:-.05em}.mock-menu{display:flex;gap:12px}.mock-menu i{width:26px;height:5px;border-radius:5px;background:#73797070}
+    .mock-content{position:relative;height:235px;margin-top:17px;padding:20px;border-radius:12px;background:#e9e4d9;overflow:hidden}
+    .mock-kicker{width:74px;height:5px;border-radius:5px;background:#647b67;margin:2px 0 13px}.mock-title{width:54%;height:14px;border-radius:4px;background:#434943;margin-bottom:8px}.mock-title.second{width:40%}.mock-paragraph{width:47%;height:5px;border-radius:4px;background:#83878070;margin-top:15px}.mock-paragraph.short{width:37%;margin-top:6px}
+    .mock-product{position:absolute;right:7%;top:28px;width:37%;height:142px;border-radius:48% 48% 9px 9px;background:linear-gradient(145deg,#c39c75,#e7d2aa 56%,#71856e);box-shadow:inset 0 -14px 22px #586d4e25}.mock-product:before{content:"";position:absolute;left:16%;bottom:14%;width:68%;height:30%;border-radius:40px 40px 9px 9px;background:linear-gradient(90deg,#aa7657,#d7a97d,#9e6d50)}.mock-product:after{content:"";position:absolute;left:41%;bottom:4%;width:7px;height:28px;background:#604c3b;box-shadow:35px 0 #604c3b}
+    .code-card{position:absolute;right:-3px;bottom:1px;width:min(340px,78%);padding:11px 13px;border:1px solid #414351;border-radius:12px;background:#191a22;color:#edf0f8;box-shadow:0 15px 40px #10101b45;transform:rotate(-2deg)}
+    .code-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #ffffff15;color:#c5c3d2;font-size:9px;font-weight:750}.code-dots{display:flex;gap:4px}.code-dots i{width:5px;height:5px;border-radius:50%;background:#ae8af2}.code-line{display:block;margin-top:6px;color:#cad0dd;font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}.pink{color:#d3a6ff}.blue{color:#87b7ff}.green{color:#a4dcac}.gold{color:#f1ce86}
+    .tool-dock{position:absolute;bottom:0;left:50%;width:min(590px,calc(100% + 5px));display:flex;gap:5px;padding:8px;border:1px solid #ffffff;border-radius:14px;background:#1b1b23;box-shadow:0 13px 38px #1b18252c;transform:translateX(-50%);overflow:hidden}
+    .dock-item{flex:1;min-width:0;padding:7px 3px;border:1px solid #ffffff14;border-radius:8px;background:#262630;color:#f1eef7;text-align:center;font-size:8px;font-weight:750;white-space:nowrap}.dock-item:first-child{border-color:#b58cff;background:#342b48}.dock-item span{display:block;margin-bottom:3px;color:#c7aafa;font-size:11px}
+    .proof{display:flex;gap:23px;flex-wrap:wrap;margin-top:30px;color:#6f7079;font-size:10px;font-weight:700}.proof span{display:flex;align-items:center;gap:7px}.proof strong{color:#302f38;font-size:12px;font-weight:850}
+    .section{padding:73px 0;border-top:1px solid #23232a0c}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:25px}
+    h2{margin:0;font-size:32px;line-height:1.15;letter-spacing:-.055em;font-weight:840}
+    .section-head p{max-width:400px;margin:0;color:#676873;font-size:13px;line-height:1.7}
+    .groups{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+    .group{padding:19px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 5px 17px #22220d04}
+    .group-label{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:#7351bd;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.group-label span{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#f0ebfa;font-size:11px;letter-spacing:0}
+    .tool{padding:12px 0;border-top:1px solid #efedf0}.tool:first-of-type{border-top:0}.tool h3{margin:0 0 3px;font-size:13px;letter-spacing:-.02em;font-weight:800}.tool p{margin:0;color:#73747e;font-size:11px;line-height:1.55}
+    .highlight{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px;border:1px solid #dfd9ec;border-radius:19px;background:linear-gradient(115deg,#f0ebfa,#f3f7f1)}
+    .highlight h2{font-size:29px}.highlight p{max-width:450px;color:#666773;font-size:13px;line-height:1.7}.highlight .button{margin-top:6px}
+    .file-preview{padding:16px;border:1px solid #3d3e4b;border-radius:13px;background:#171820;color:#dce1ed;box-shadow:0 12px 32px #2520321a}
+    .file-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid #ffffff16;color:#bcbac7;font-size:10px;font-weight:750}.file-head span:last-child{padding:3px 6px;border:1px solid #514366;border-radius:5px;background:#28213a;color:#d6c4ff;font:700 9px ui-monospace,SFMono-Regular,Consolas,monospace}
+    .file-code{display:grid;grid-template-columns:24px 1fr;gap:0 10px;padding-top:9px;color:#788091;font:10px/1.9 ui-monospace,SFMono-Regular,Consolas,monospace}.file-code code{color:#d9deea;font:inherit;white-space:pre}.file-code .tag{color:#cf9df5}.file-code .prop{color:#92b8ff}.file-code .value{color:#b4dda4}
+    .workflow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.flow{padding:19px;border-radius:14px;background:#fff;border:1px solid var(--line)}.flow-number{margin-bottom:12px;color:#8b6cd0;font-size:11px;font-weight:850;letter-spacing:.1em}.flow h3{margin:0 0 5px;font-size:14px;font-weight:820}.flow p{margin:0;color:#70717b;font-size:11px;line-height:1.65}
+    .cta-band{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:23px 25px;border-radius:16px;background:#202129;color:#f4f2fa}.cta-band h2{font-size:21px}.cta-band p{margin:5px 0 0;color:#c3c1cd;font-size:11px}.cta-band .button-secondary{background:#ffffff12;border-color:#ffffff32;color:white}.cta-actions{display:flex;gap:9px;flex-wrap:wrap;flex:none}
+    .privacy-note{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:22px 0;color:#6b6c76;font-size:11px}.privacy-note strong{display:block;color:#30313a;font-size:12px}.privacy-note a{flex:none;color:#6545a8;text-decoration:none;font-weight:750}.privacy-note a:hover{text-decoration:underline}
+    footer{padding:17px 0 28px;border-top:1px solid #23232a0c;display:flex;justify-content:space-between;gap:14px;color:#787984;font-size:10px}footer a{color:#51446c;text-decoration:none;font-weight:700}
+    :focus-visible{outline:3px solid #9c7be3;outline-offset:3px}
+    @media(max-width:850px){.hero{gap:12px}.hero-art{min-height:360px}.mock-page{height:285px}.mock-content{height:200px}.groups{grid-template-columns:1fr 1fr}.groups .group:last-child{grid-column:1/-1}.tool-dock{width:calc(100% + 4px)}}
+    @media(max-width:640px){.shell{width:calc(100% - 32px)}.nav{height:66px}.nav-links{gap:11px;font-size:10px}.nav-links a:first-child{display:none}.nav-links .nav-cta{padding:8px}.hero{grid-template-columns:1fr;padding:48px 0 42px}.hero:before{right:-190px;top:220px;width:480px;height:400px}.hero-copy{font-size:15px}.hero-art{min-height:325px;margin-top:3px}.mock-page{height:255px}.mock-site{padding:16px}.mock-content{height:177px}.mock-product{height:119px}.code-card{width:76%}.dock-item{font-size:7px;padding:6px 1px}.proof{gap:12px}.section{padding:50px 0}.section-head{align-items:start;flex-direction:column;gap:8px}h2{font-size:27px}.groups,.workflow{grid-template-columns:1fr}.groups .group:last-child{grid-column:auto}.highlight{grid-template-columns:1fr;padding:19px;gap:15px}.highlight h2{font-size:25px}.cta-band{align-items:start;flex-direction:column;padding:20px}.cta-actions{width:100%}.privacy-note{align-items:start;flex-direction:column}footer{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="nav">
+      <a class="brand" href="index.html"><span class="mark" aria-hidden="true">P</span>PageLens</a>
+      <nav class="nav-links" aria-label="Main navigation"><a href="#tools">Tools</a><a href="preview.html">Live preview</a><a href="https://github.com/xorudra/pagelens" target="_blank" rel="noopener">GitHub</a><a class="nav-cta" href="install.html">Install guide</a></nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="eyebrow">A closer look at the web</div>
+          <h1 id="hero-title">See how a page is put together.</h1>
+          <p class="hero-copy">Inspect the details, try a different direction, and take useful design notes and code with you—all from the page you’re viewing.</p>
+          <div class="actions"><a class="button button-primary" href="preview.html">Try the live preview <span aria-hidden="true">→</span></a><a class="button button-secondary" href="install.html">Get PageLens</a></div>
+          <div class="under-actions"><span class="green-dot" aria-hidden="true"></span>Explore the sample page before installing</div>
+          <div class="proof"><span><strong>13</strong> website tools</span><span><strong>Local</strong> page analysis</span><span><strong>No</strong> account needed</span></div>
+        </div>
+        <div class="hero-art" aria-label="PageLens toolbar and highlighted code preview">
+          <div class="mock-page">
+            <div class="mock-browser"><i></i><i></i><i></i><span class="mock-address"></span></div>
+            <div class="mock-site"><div class="mock-nav"><span class="mock-wordmark">morrow.</span><div class="mock-menu"><i></i><i></i><i></i></div></div><div class="mock-content"><div class="mock-kicker"></div><div class="mock-title"></div><div class="mock-title second"></div><div class="mock-paragraph"></div><div class="mock-paragraph short"></div><div class="mock-product"></div></div></div>
+          </div>
+          <div class="code-card" aria-hidden="true"><div class="code-top"><span>CLONE PAGE · index.html</span><span class="code-dots"><i></i><i></i><i></i></span></div><code class="code-line"><span class="pink">&lt;section</span> <span class="blue">class</span>=<span class="green">"hero"</span><span class="pink">&gt;</span></code><code class="code-line">&nbsp;&nbsp;<span class="pink">&lt;h1&gt;</span>Thoughtful pieces<span class="pink">&lt;/h1&gt;</span></code><code class="code-line">&nbsp;&nbsp;<span class="gold">/* visible layout snapshot */</span></code><code class="code-line"><span class="pink">&lt;/section&gt;</span></code></div>
+          <div class="tool-dock" aria-hidden="true"><div class="dock-item"><span>⌖</span>Pick</div><div class="dock-item"><span>▤</span>Clone</div><div class="dock-item"><span>◈</span>Prompt</div><div class="dock-item"><span>◉</span>Colors</div><div class="dock-item"><span>Tt</span>Fonts</div><div class="dock-item"><span>↔</span>Measure</div><div class="dock-item"><span>▣</span>Capture</div><div class="dock-item"><span>▦</span>Responsive</div></div>
+        </div>
+      </section>
+
+      <section class="section" id="tools" aria-labelledby="tools-title">
+        <div class="section-head"><h2 id="tools-title">Thirteen tools for the details that matter.</h2><p>Pick one component, collect a full-page reference, or test how a new design direction feels.</p></div>
+        <div class="groups">
+          <article class="group"><div class="group-label"><span>01</span> Inspect</div>
+            <div class="tool"><h3>Pick element</h3><p>Preview and copy a selected element’s HTML and computed CSS.</p></div>
+            <div class="tool"><h3>Inspect &amp; measure</h3><p>Check dimensions, spacing, styles, and distances on the page.</p></div>
+            <div class="tool"><h3>Extract colors</h3><p>Collect a palette of the colors used throughout the page.</p></div>
+            <div class="tool"><h3>Detect fonts</h3><p>See font family, size, weight, and line height on hover.</p></div>
+          </article>
+          <article class="group"><div class="group-label"><span>02</span> Collect</div>
+            <div class="tool"><h3>Clone page</h3><p>Preview a rendered snapshot and inspect highlighted code in its ZIP.</p></div>
+            <div class="tool"><h3>Extract assets</h3><p>Find images, SVGs, video, and page backgrounds.</p></div>
+            <div class="tool"><h3>Design MD</h3><p>Save page colors, typography, and spacing as a reference.</p></div>
+            <div class="tool"><h3>Design prompt</h3><p>Build a detailed, editable brief for your next design.</p></div>
+          </article>
+          <article class="group"><div class="group-label"><span>03</span> Experiment</div>
+            <div class="tool"><h3>Edit text</h3><p>Preview your own copy and see how it fits in the layout.</p></div>
+            <div class="tool"><h3>Swap fonts</h3><p>Try another typeface on headings, body text, or an element.</p></div>
+            <div class="tool"><h3>Screenshot</h3><p>Capture, crop, annotate, and export a page or element.</p></div>
+            <div class="tool"><h3>Responsive viewer</h3><p>Compare multiple viewport widths side by side.</p></div>
+            <div class="tool"><h3>Move &amp; delete</h3><p>Rearrange or remove elements and undo your changes.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="clone-title">
+        <div class="highlight">
+          <div><div class="eyebrow">Code you can actually inspect</div><h2 id="clone-title">Review every file before you keep it.</h2><p>Clone Page creates a ZIP with a rendered page snapshot and selected assets. Browse text files as syntax-colored code with line numbers, search their contents, and copy or save the files you need.</p><a class="button button-primary" href="preview.html">See Clone Page in the preview →</a></div>
+          <div class="file-preview" aria-label="Example of syntax-highlighted HTML code"><div class="file-head"><span>index.html</span><span>HTML</span></div><div class="file-code"><span>1</span><code><span class="tag">&lt;main&gt;</span></code><span>2</span><code>  <span class="tag">&lt;h1&gt;</span>Make room for a slower home<span class="tag">&lt;/h1&gt;</span></code><span>3</span><code>  <span class="tag">&lt;p</span> <span class="prop">class</span>=<span class="value">"intro"</span><span class="tag">&gt;</span>Thoughtful pieces…</code><span>4</span><code>  <span class="tag">&lt;/p&gt;</span></code><span>5</span><code><span class="tag">&lt;/main&gt;</span></code></div></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="workflow-title">
+        <div class="section-head"><h2 id="workflow-title">From reference to your next idea.</h2><p>Use PageLens to learn from a page, then carry the parts you need into your own work.</p></div>
+        <div class="workflow">
+          <article class="flow"><div class="flow-number">STEP 01</div><h3>Open a website</h3><p>Try the sample page now, or install PageLens and open a regular website in your browser.</p></article>
+          <article class="flow"><div class="flow-number">STEP 02</div><h3>Choose a tool</h3><p>Inspect one element, collect the colors, compare screen widths, or explore the whole page.</p></article>
+          <article class="flow"><div class="flow-number">STEP 03</div><h3>Save what helps</h3><p>Copy code, download selected assets, or keep a design reference for your project.</p></article>
+        </div>
+      </section>
+
+      <section class="section" aria-label="Try or install PageLens">
+        <div class="cta-band"><div><h2>Take a look around.</h2><p>The interactive preview works without installing. Browser screenshot capture needs the extension.</p></div><div class="cta-actions"><a class="button button-primary" href="preview.html">Try preview</a><a class="button button-secondary" href="install.html">Install guide</a></div></div>
+        <div class="privacy-note"><div><strong>Page details stay in your browser.</strong> Optional fonts and assets are requested from their source hosts.</div><a href="https://github.com/xorudra/pagelens/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy details →</a></div>
+      </section>
+    </main>
+
+    <footer><span>PageLens · Browser tools for designers and developers</span><span><a href="preview.html">Preview</a> · <a href="install.html">Install</a> · <a href="https://github.com/xorudra/pagelens" target="_blank" rel="noopener">GitHub</a></span></footer>
+  </div>
+</body>
+</html>
+
