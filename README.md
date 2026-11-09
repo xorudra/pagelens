@@ -34,23 +34,44 @@ Screenshot capture and responsive reference capture require the installed extens
 - `storage` saves the toolbar position, tool order, screenshot default, responsive widths, and Clone Page inclusion choices on this device.
 - PageLens does not request access to all websites or run analytics. Optional font and asset requests go directly to their source hosts.
 
-## Install in Chrome
+## Install in Chrome, Edge, or Brave
 
-For picture-led steps and common fixes, use the [PageLens installation guide](https://xorudra.github.io/pagelens/install.html).
+Install PageLens once in each Chromium browser:
 
-1. [Download PageLens](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip) and extract the ZIP.
-2. In Chrome, open `chrome://extensions`, turn on **Developer mode**, then choose **Load unpacked**.
-3. Select the extracted PageLens folder whose top level contains `manifest.json`. The folder picker selects a folder, so `manifest.json` will not appear as a selectable file; select that folder and click **Select Folder**.
-4. Confirm PageLens appears on the extensions page with its switch on. Open a regular website, refresh it once, then click the PageLens toolbar icon. Pin PageLens from the Extensions menu if you want it beside the address bar.
+1. [Download `pagelens.zip`](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip) and extract it.
+2. Open the browser’s extensions page: `chrome://extensions`, `edge://extensions`, or `brave://extensions`. Turn on **Developer mode**.
+3. Choose **Load unpacked** and select the extracted **PageLens folder**. Select the folder containing `manifest.json`; the file picker may not show the manifest itself.
+4. Open a regular website and click PageLens in the browser toolbar. If it is tucked under the Extensions menu, pin it there.
 
-To update an existing installation, either replace the files in the same extracted folder Chrome already loads and click **Reload**, or remove PageLens and load the newly extracted folder. Clicking **Reload** without replacing the files will keep using the old folder.
+For illustrated steps and troubleshooting, open the [installation guide](https://xorudra.github.io/pagelens/install.html). To update PageLens, extract the new ZIP over the same folder the browser already uses, then click **Reload** on the extensions page.
 
-If you are in the Chrome Web Store developer dashboard and choose **Upload package**, select `pagelens.zip`. That is for publishing; it is not part of local installation. For local use, choose **Load unpacked** and select the extracted folder.
+## Installation and architecture
+
+This diagram shows what to select during setup and what each extension file does after installation.
+
+```mermaid
+flowchart LR
+  subgraph Setup[Install once]
+    A[Download pagelens.zip] --> B[Extract PageLens folder]
+    B --> C[Open browser extensions page]
+    C --> D[Enable Developer mode]
+    D --> E[Choose Load unpacked]
+    E --> F[Select folder with manifest.json]
+  end
+
+  F --> G[Click PageLens toolbar icon]
+  subgraph Runtime[PageLens in the browser]
+    G --> H[background.js<br/>Manifest V3 service worker]
+    H --> I[Inject host.css and content.js]
+    I --> J[PageLens tools in the current tab]
+    J --> K[chrome.storage.local<br/>Saved preferences]
+    H --> L[Chrome downloads<br/>Captures and requested assets]
+    J --> M[Browser downloads<br/>Prompts, code, and other exports]
+  end
+```
+
+The ZIP contains only the seven extension files, with `manifest.json` at its root. README and store artwork are not needed when loading the extension.
 
 Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Full-page capture is limited to 40 screens and may repeat sticky elements. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and only the selected image/assets, fonts, and media that the browser can fetch. Unselected or blocked files stay linked to their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.
-
-## Chrome Web Store listing
-
-Store listing text, promotional artwork, and a release checklist are in the repository root. The downloadable ZIP contains only the extension files, with `manifest.json` at its root.
 
 Swap Fonts retrieves the full Google Fonts family list from the upstream catalog and lets you apply a family to the whole page, headings, body text, or a selected element.
