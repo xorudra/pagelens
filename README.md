@@ -34,43 +34,20 @@ Screenshot capture and responsive reference capture require the installed extens
 - `storage` saves the toolbar position, tool order, screenshot default, responsive widths, and Clone Page inclusion choices on this device.
 - PageLens does not request access to all websites or run analytics. Optional font and asset requests go directly to their source hosts.
 
-## Install in Chrome, Edge, or Brave
+## Download and install PageLens
 
-Install PageLens once in each Chromium browser:
+[Download the PageLens ZIP](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip), then follow the picture guide:
 
-1. [Download `pagelens.zip`](https://github.com/xorudra/pagelens/raw/refs/heads/main/pagelens.zip) and extract it.
-2. Open the browser’s extensions page: `chrome://extensions`, `edge://extensions`, or `brave://extensions`. Turn on **Developer mode**.
-3. Choose **Load unpacked** and select the extracted **PageLens folder**. Select the folder containing `manifest.json`; the file picker may not show the manifest itself.
-4. Open a regular website and click PageLens in the browser toolbar. If it is tucked under the Extensions menu, pin it there.
+![Six steps to download and install PageLens in Chrome, Edge, or Brave](images/install-pagelens.png)
 
-For illustrated steps and troubleshooting, open the [installation guide](https://xorudra.github.io/pagelens/install.html). To update PageLens, extract the new ZIP over the same folder the browser already uses, then click **Reload** on the extensions page.
+1. Download `pagelens.zip` from the link above.
+2. Extract the ZIP file.
+3. Open your browser’s extensions page: `chrome://extensions`, `edge://extensions`, or `brave://extensions`.
+4. Turn on **Developer mode**, then choose **Load unpacked**.
+5. Select the extracted **PageLens folder** that contains `manifest.json`. Select the folder itself; the file picker may not show the manifest file.
+6. Open a regular website and click PageLens in the browser toolbar. Pin it from the Extensions menu if it is hidden.
 
-## Installation and architecture
-
-This diagram shows what to select during setup and what each extension file does after installation.
-
-```mermaid
-flowchart LR
-  subgraph Setup[Install once]
-    A[Download pagelens.zip] --> B[Extract PageLens folder]
-    B --> C[Open browser extensions page]
-    C --> D[Enable Developer mode]
-    D --> E[Choose Load unpacked]
-    E --> F[Select folder with manifest.json]
-  end
-
-  F --> G[Click PageLens toolbar icon]
-  subgraph Runtime[PageLens in the browser]
-    G --> H[background.js<br/>Manifest V3 service worker]
-    H --> I[Inject host.css and content.js]
-    I --> J[PageLens tools in the current tab]
-    J --> K[chrome.storage.local<br/>Saved preferences]
-    H --> L[Chrome downloads<br/>Captures and requested assets]
-    J --> M[Browser downloads<br/>Prompts, code, and other exports]
-  end
-```
-
-The ZIP contains only the seven extension files, with `manifest.json` at its root. README and store artwork are not needed when loading the extension.
+For illustrated troubleshooting, use the [installation guide](https://xorudra.github.io/pagelens/install.html). To update PageLens, extract the new ZIP over the folder already loaded in your browser, then click **Reload** on the extensions page.
 
 Some pages cannot be inspected, including browser settings and Chrome Web Store pages. A site may block the responsive preview from embedding. Full-page capture is limited to 40 screens and may repeat sticky elements. Clone Page downloads a ZIP with a rendered HTML snapshot, accessible CSS rules, and only the selected image/assets, fonts, and media that the browser can fetch. Unselected or blocked files stay linked to their original URLs. It does not include the original project source, scripts, backend, or application behavior. Use collected content and assets only when you have permission.
 
